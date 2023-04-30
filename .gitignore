@@ -1,0 +1,6 @@
+resources/
+obj
+bin
+.vscode
+.config
+Content
