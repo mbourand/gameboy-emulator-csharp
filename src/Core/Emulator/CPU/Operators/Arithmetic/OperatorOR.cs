@@ -6,9 +6,9 @@ public class OperatorOR : CPUOperator
 {
 	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
-	private FlagHandler _flagHandler;
+	private FlagPermissionHandler _flagHandler;
 
-	public OperatorOR(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagHandler flagHandler) : base("OR", 1)
+	public OperatorOR(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler) : base("OR", 1)
 	{
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;

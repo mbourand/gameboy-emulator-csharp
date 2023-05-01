@@ -6,16 +6,17 @@ public class Gameboy
 {
 	private Cartridge _cartridge;
 	private Memory _memory;
-	private CPU _cpu;
+	public CPU cpu { get; private set; }
 
 	public Gameboy(System.IO.Stream romStream)
 	{
 		_cartridge = new Cartridge(romStream);
 		_memory = new Memory(_cartridge);
-		_cpu = new CPU();
+		cpu = new CPU(_memory);
 	}
 
 	public void Update(float deltaTime)
 	{
+		cpu.Cycle();
 	}
 }

@@ -5,8 +5,8 @@ namespace GBMU.Core;
 // Cette classe effectue une opération de chargement de données selon le type de données source et de destination
 public class OperatorLoad : CPUOperator
 {
-	private OperationDataType _sourceDataType;
-	private OperationDataType _destinationDataType;
+	protected OperationDataType _sourceDataType;
+	protected OperationDataType _destinationDataType;
 
 	public OperatorLoad(OperationDataType sourceDataType, OperationDataType destinationDataType) : base("LD", 1)
 	{

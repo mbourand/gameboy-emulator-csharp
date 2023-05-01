@@ -6,9 +6,9 @@ public class OperatorCP : CPUOperator
 {
 	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
-	private FlagHandler _flagHandler;
+	private FlagPermissionHandler _flagHandler;
 
-	public OperatorCP(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagHandler flagHandler) : base("CP", 1)
+	public OperatorCP(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler) : base("CP", 1)
 	{
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;

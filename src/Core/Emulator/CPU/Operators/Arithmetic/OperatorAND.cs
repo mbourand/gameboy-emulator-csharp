@@ -6,9 +6,9 @@ public class OperatorAND : CPUOperator
 {
 	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
-	private FlagHandler _flagHandler;
+	private FlagPermissionHandler _flagHandler;
 
-	public OperatorAND(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagHandler flagHandler) : base("AND", 1)
+	public OperatorAND(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler) : base("AND", 1)
 	{
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;

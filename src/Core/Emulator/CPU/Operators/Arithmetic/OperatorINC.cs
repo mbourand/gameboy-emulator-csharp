@@ -2,19 +2,17 @@ namespace GBMU.Core;
 
 public class OperatorINC : CPUOperator
 {
-	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
 
-	public OperatorINC(OperationDataType sourceDataType, OperationDataType destinationDataType) : base("INC", 1)
+	public OperatorINC(OperationDataType destinationDataType) : base("INC", 1)
 	{
-		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;
-		length += (byte)(_sourceDataType.GetLength() + _destinationDataType.GetLength());
+		length += _destinationDataType.GetLength();
 	}
 
 	public override void Execute(CPU cpu, Memory memory, int opcode)
 	{
-		var value = _sourceDataType.GetSourceValue(cpu, memory);
+		var value = _destinationDataType.GetSourceValue(cpu, memory);
 
 		cpu.SetFlag(CPUFlag.N_SUBTRACT, false);
 		cpu.SetFlag(CPUFlag.HALF_CARRY, (value & 0x0F) == 0x0F);
@@ -26,6 +24,6 @@ public class OperatorINC : CPUOperator
 
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr)
 	{
-		return base.ToString() + $" {_destinationDataType.GetMnemonic()}, {_sourceDataType.GetMnemonic()}";
+		return base.ToString() + $" {_destinationDataType.GetMnemonic()}";
 	}
 }

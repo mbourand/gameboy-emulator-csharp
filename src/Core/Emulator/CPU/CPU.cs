@@ -1,3 +1,5 @@
+using System;
+
 namespace GBMU.Core;
 
 public partial class CPU
@@ -5,10 +7,12 @@ public partial class CPU
 	public byte A, B, C, D, E, H, L;
 	private byte _f;
 	private ushort _sp, _pc;
+	private Memory _memory;
 
-	public CPU()
+	public CPU(Memory memory)
 	{
 		InitializeRegisters();
+		_memory = memory;
 	}
 
 	private void InitializeRegisters()
@@ -57,6 +61,18 @@ public partial class CPU
 		set => _pc = value;
 	}
 
+	public void Cycle()
+	{
+		// Fetch
+		byte opcode = _memory.ReadByte(_pc);
+
+		// Decode
+		CPUOperator instruction = InstructionSet.GetInstruction(opcode);
+
+		// Execute
+		instruction.Execute(this, _memory, opcode);
+	}
+
 	private void Set16BitRegister(ref byte high, ref byte low, ushort value)
 	{
 		high = ByteUtils.HighByte(value);
@@ -77,6 +93,13 @@ public partial class CPU
 	}
 
 	public bool GetFlag(CPUFlag flag) => (_f & (byte)flag) != 0;
+
+
+	public string DebugString()
+	{
+		string debugString = $"AF: {AF:X4} BC: {BC:X4} DE: {DE:X4} HL: {HL:X4} SP: {SP:X4} PC: {PC:X4} F: {Convert.ToString(_f, 2).PadLeft(8, '0')}";
+		return debugString;
+	}
 
 	public static ushort AFBaseValue = 0x01B0;
 	public static ushort BCBaseValue = 0x0013;

@@ -6,12 +6,12 @@ public class OperatorSUB : CPUOperator
 {
 	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
-	private FlagHandler _flagHandler;
+	private FlagPermissionHandler _flagHandler;
 	private CarryBit _carryBit;
 	private HalfCarryBit _halfCarryBit;
 	private bool _isSourceSigned;
 
-	public OperatorSUB(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagHandler flagHandler, CarryBit carryBit, HalfCarryBit halfCarryBit, bool isSourceSigned = false)
+	public OperatorSUB(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler, CarryBit carryBit, HalfCarryBit halfCarryBit, bool isSourceSigned = false)
 		: base("SUB", 1)
 	{
 		_sourceDataType = sourceDataType;

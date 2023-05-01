@@ -6,9 +6,9 @@ public class OperatorXOR : CPUOperator
 {
 	private OperationDataType _sourceDataType;
 	private OperationDataType _destinationDataType;
-	private FlagHandler _flagHandler;
+	private FlagPermissionHandler _flagHandler;
 
-	public OperatorXOR(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagHandler flagHandler) : base("XOR", 1)
+	public OperatorXOR(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler) : base("XOR", 1)
 	{
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;
