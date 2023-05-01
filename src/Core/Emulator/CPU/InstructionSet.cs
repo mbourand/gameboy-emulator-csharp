@@ -31,7 +31,7 @@ public static class InstructionSet
 		0x15 => new OperatorDEC(new DataTypeReg8(CPURegister.D)),
 		0x16 => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.D)),
 		0x17 => new OperatorRLA(),
-		// 		0x18 => new OperatorJR(new DataTypeU8()),
+		0x18 => new OperatorJR(new DataTypeU8()),
 		0x19 => new OperatorADD(new DataTypeReg16(CPURegister.DE), new DataTypeReg16(CPURegister.HL), new FlagPermissionHandler("-0HC"), CarryBit.BIT_16, HalfCarryBit.BIT_12),
 		0x1A => new OperatorLoad(new DataTypeReg16Address(CPURegister.DE), new DataTypeReg8(CPURegister.A)),
 		0x1B => new OperatorDEC(new DataTypeReg16(CPURegister.DE)),
@@ -40,7 +40,7 @@ public static class InstructionSet
 		0x1E => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.E)),
 		0x1F => new OperatorRRA(),
 
-		// 0x20 => new OperatorJR(new DataTypeU8(), new FlagPermissionHandler("Z000"), false),
+		0x20 => new OperatorJRFlag(CPUFlag.ZERO, false, new DataTypeU8()),
 		0x21 => new OperatorLoad(new DataTypeU16(), new DataTypeReg16(CPURegister.HL)),
 		0x22 => new OperatorLoadShift(new DataTypeReg8(CPURegister.A), new DataTypeReg16Address(CPURegister.HL), CPURegister.HL, ShiftingBehaviour.INCREMENT),
 		0x23 => new OperatorINC(new DataTypeReg16(CPURegister.HL)),
@@ -48,7 +48,7 @@ public static class InstructionSet
 		0x25 => new OperatorDEC(new DataTypeReg8(CPURegister.H)),
 		0x26 => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.H)),
 		0x27 => new OperatorDAA(),
-		// 0x28 => new OperatorJR(new DataTypeU8(), new FlagPermissionHandler("Z000"), true),
+		0x28 => new OperatorJRFlag(CPUFlag.ZERO, true, new DataTypeU8()),
 		0x29 => new OperatorADD(new DataTypeReg16(CPURegister.HL), new DataTypeReg16(CPURegister.HL), new FlagPermissionHandler("-0HC"), CarryBit.BIT_16, HalfCarryBit.BIT_12),
 		0x2A => new OperatorLoadShift(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), CPURegister.HL, ShiftingBehaviour.INCREMENT),
 		0x2B => new OperatorDEC(new DataTypeReg16(CPURegister.HL)),
@@ -57,7 +57,7 @@ public static class InstructionSet
 		0x2E => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.L)),
 		// 0x2F => new OperatorCPL(),
 
-		// 0x30 => new OperatorJR(new DataTypeU8(), new FlagPermissionHandler("C000"), false),
+		0x30 => new OperatorJRFlag(CPUFlag.CARRY, false, new DataTypeU8()),
 		0x31 => new OperatorLoad(new DataTypeU16(), new DataTypeReg16(CPURegister.SP)),
 		0x32 => new OperatorLoadShift(new DataTypeReg8(CPURegister.A), new DataTypeReg16Address(CPURegister.HL), CPURegister.HL, ShiftingBehaviour.DECREMENT),
 		0x33 => new OperatorINC(new DataTypeReg16(CPURegister.SP)),
@@ -65,7 +65,7 @@ public static class InstructionSet
 		0x35 => new OperatorDEC(new DataTypeReg16Address(CPURegister.HL)),
 		0x36 => new OperatorLoad(new DataTypeU8(), new DataTypeReg16Address(CPURegister.HL)),
 		0x37 => new OperatorSCF(),
-		// 0x38 => new OperatorJR(new DataTypeU8(), new FlagPermissionHandler("C000"), true),
+		0x38 => new OperatorJRFlag(CPUFlag.CARRY, true, new DataTypeU8()),
 		0x39 => new OperatorADD(new DataTypeReg16(CPURegister.SP), new DataTypeReg16(CPURegister.HL), new FlagPermissionHandler("-0HC"), CarryBit.BIT_16, HalfCarryBit.BIT_12),
 		0x3A => new OperatorLoadShift(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), CPURegister.HL, ShiftingBehaviour.DECREMENT),
 		0x3B => new OperatorDEC(new DataTypeReg16(CPURegister.SP)),
@@ -150,6 +150,17 @@ public static class InstructionSet
 		0x85 => new OperatorADD(new DataTypeReg8(CPURegister.L), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 		0x86 => new OperatorADD(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 		0x87 => new OperatorADD(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		// ADC
+
+		0x90 => new OperatorSUB(new DataTypeReg8(CPURegister.B), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x91 => new OperatorSUB(new DataTypeReg8(CPURegister.C), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x92 => new OperatorSUB(new DataTypeReg8(CPURegister.D), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x93 => new OperatorSUB(new DataTypeReg8(CPURegister.E), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x94 => new OperatorSUB(new DataTypeReg8(CPURegister.H), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x95 => new OperatorSUB(new DataTypeReg8(CPURegister.L), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x96 => new OperatorSUB(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x97 => new OperatorSUB(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		// SBC
 
 		0xA0 => new OperatorAND(new DataTypeReg8(CPURegister.B), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z010")),
 		0xA1 => new OperatorAND(new DataTypeReg8(CPURegister.C), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z010")),
@@ -184,7 +195,6 @@ public static class InstructionSet
 		0xBD => new OperatorCP(new DataTypeReg8(CPURegister.L), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
 		0xBE => new OperatorCP(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
 		0xBF => new OperatorCP(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
-
 
 		0xEA => new OperatorLoad(new DataTypeReg8(CPURegister.A), new DataTypeU16Address()),
 

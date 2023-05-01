@@ -31,18 +31,18 @@ public class OperatorSUB : CPUOperator
 
 		ApplyFlags(cpu, signedSource, destinationValue);
 
-		var result = (ushort)(destinationValue - signedSource);
+		var result = (ushort)(signedSource - destinationValue);
 		_destinationDataType.WriteToDestination(cpu, memory, result);
 
 		base.Execute(cpu, memory, opcode);
 	}
 
-	private void ApplyFlags(CPU cpu, int source, int destination)
+	private void ApplyFlags(CPU cpu, int a, int b)
 	{
 		var halfCarryMask = (int)_halfCarryBit - 1;
 
-		int result = destination - source;
-		int halfResult = (source & halfCarryMask) - (destination & halfCarryMask);
+		int result = a - b;
+		int halfResult = (a & halfCarryMask) - (b & halfCarryMask);
 
 		Dictionary<CPUFlag, bool> newFlags = new()
 		{
