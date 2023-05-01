@@ -4,14 +4,14 @@ using Microsoft.Xna.Framework.Input;
 
 namespace GBMU.UI;
 
-public class GMBUWindow : Game
+public class GBMUWindow : Game
 {
 	private GraphicsDeviceManager _graphics;
 	private SpriteBatch _spriteBatch;
 
 	private Gameboy _gameboy;
 
-	public GMBUWindow()
+	public GBMUWindow()
 	{
 		_graphics = new GraphicsDeviceManager(this);
 		Content.RootDirectory = "Content";
