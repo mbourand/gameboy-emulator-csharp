@@ -12,8 +12,8 @@ public class OperatorJR : CPUOperator
 
 	public override void Execute(CPU cpu, Memory memory, int opcode)
 	{
-		var offset = (sbyte)memory.ReadByte((ushort)(cpu.PC + 1));
-		cpu.PC = (ushort)(cpu.PC + offset);
+		var offset = ((sbyte)((byte)_offsetDataType.GetSourceValue(cpu, memory)));
+		cpu.PC = (ushort)(cpu.PC - offset);
 		base.Execute(cpu, memory, opcode);
 	}
 

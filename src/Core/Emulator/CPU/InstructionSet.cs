@@ -55,7 +55,7 @@ public static class InstructionSet
 		0x2C => new OperatorINC(new DataTypeReg8(CPURegister.L)),
 		0x2D => new OperatorDEC(new DataTypeReg8(CPURegister.L)),
 		0x2E => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.L)),
-		// 0x2F => new OperatorCPL(),
+		0x2F => new OperatorCPL(),
 
 		0x30 => new OperatorJRFlag(CPUFlag.CARRY, false, new DataTypeU8()),
 		0x31 => new OperatorLoad(new DataTypeU16(), new DataTypeReg16(CPURegister.SP)),
@@ -72,7 +72,7 @@ public static class InstructionSet
 		0x3C => new OperatorINC(new DataTypeReg8(CPURegister.A)),
 		0x3D => new OperatorDEC(new DataTypeReg8(CPURegister.A)),
 		0x3E => new OperatorLoad(new DataTypeU8(), new DataTypeReg8(CPURegister.A)),
-		// 0x3F => new OperatorCCF(),
+		0x3F => new OperatorCCF(),
 
 		0x40 => new OperatorLoad(new DataTypeReg8(CPURegister.B), new DataTypeReg8(CPURegister.B)),
 		0x41 => new OperatorLoad(new DataTypeReg8(CPURegister.C), new DataTypeReg8(CPURegister.B)),
@@ -150,7 +150,14 @@ public static class InstructionSet
 		0x85 => new OperatorADD(new DataTypeReg8(CPURegister.L), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 		0x86 => new OperatorADD(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 		0x87 => new OperatorADD(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
-		// ADC
+		0x88 => new OperatorADC(new DataTypeReg8(CPURegister.B), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x89 => new OperatorADC(new DataTypeReg8(CPURegister.C), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8A => new OperatorADC(new DataTypeReg8(CPURegister.D), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8B => new OperatorADC(new DataTypeReg8(CPURegister.E), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8C => new OperatorADC(new DataTypeReg8(CPURegister.H), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8D => new OperatorADC(new DataTypeReg8(CPURegister.L), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8E => new OperatorADC(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0x8F => new OperatorADC(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 
 		0x90 => new OperatorSUB(new DataTypeReg8(CPURegister.B), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 		0x91 => new OperatorSUB(new DataTypeReg8(CPURegister.C), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
@@ -196,9 +203,29 @@ public static class InstructionSet
 		0xBE => new OperatorCP(new DataTypeReg16Address(CPURegister.HL), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
 		0xBF => new OperatorCP(new DataTypeReg8(CPURegister.A), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
 
-		0xEA => new OperatorLoad(new DataTypeReg8(CPURegister.A), new DataTypeU16Address()),
+		0xC2 => new OperatorJPFlag(CPUFlag.ZERO, false, new DataTypeU16()),
+		0xC3 => new OperatorJP(new DataTypeU16()),
+		0xC6 => new OperatorADD(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0xCA => new OperatorJPFlag(CPUFlag.ZERO, true, new DataTypeU16()),
+		0xCE => new OperatorADC(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z0HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
 
+		0xD2 => new OperatorJPFlag(CPUFlag.CARRY, false, new DataTypeU16()),
+		0xD6 => new OperatorSUB(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC"), CarryBit.BIT_8, HalfCarryBit.BIT_4),
+		0xDA => new OperatorJPFlag(CPUFlag.CARRY, true, new DataTypeU16()),
+
+		0xE0 => new OperatorLoad(new DataTypeReg8(CPURegister.A), new DataTypeU8Address()),
+		0xE2 => new OperatorLoad(new DataTypeReg8(CPURegister.A), new DataTypeReg8Address(CPURegister.C)),
+		0xE6 => new OperatorAND(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z010")),
+		0xE8 => new OperatorADD(new DataTypeU8(), new DataTypeReg16(CPURegister.SP), new FlagPermissionHandler("00HC"), CarryBit.BIT_16, HalfCarryBit.BIT_12, true),
+		0xE9 => new OperatorJP(new DataTypeReg16Address(CPURegister.HL)),
+		0xEA => new OperatorLoad(new DataTypeReg8(CPURegister.A), new DataTypeU16Address()),
+		0xEE => new OperatorXOR(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z000")),
+
+		0xF0 => new OperatorLoad(new DataTypeU8Address(), new DataTypeReg8(CPURegister.A)),
+		0xF2 => new OperatorLoad(new DataTypeReg8Address(CPURegister.C), new DataTypeReg8(CPURegister.A)),
+		0xF6 => new OperatorOR(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z000")),
 		0xFA => new OperatorLoad(new DataTypeU16Address(), new DataTypeReg8(CPURegister.A)),
+		0xFE => new OperatorCP(new DataTypeU8(), new DataTypeReg8(CPURegister.A), new FlagPermissionHandler("Z1HC")),
 
 
 		_ => throw new System.Exception("Invalid opcode")

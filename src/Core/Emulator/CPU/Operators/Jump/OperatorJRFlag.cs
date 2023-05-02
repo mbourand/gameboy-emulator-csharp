@@ -18,8 +18,8 @@ public class OperatorJRFlag : CPUOperator
 	{
 		if (cpu.GetFlag(_flag) == _expectedValue)
 		{
-			var offset = (sbyte)memory.ReadByte((ushort)(cpu.PC + 1));
-			cpu.PC = (ushort)(cpu.PC + offset);
+			var offset = ((sbyte)((byte)_offsetDataType.GetSourceValue(cpu, memory)));
+			cpu.PC = (ushort)(cpu.PC - offset);
 		}
 
 		base.Execute(cpu, memory, opcode);
@@ -27,9 +27,8 @@ public class OperatorJRFlag : CPUOperator
 
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr)
 	{
-		var offset = (sbyte)memory.ReadByte((ushort)(addr + 1));
 		var negativePrefix = _expectedValue ? "" : "N";
 		var flagChar = _flag.GetChar();
-		return base.ToString() + $" ${negativePrefix}${flagChar}, ${offset}";
+		return base.ToString() + $" ${negativePrefix}${flagChar}, ${_offsetDataType.GetMnemonic()}";
 	}
 }
