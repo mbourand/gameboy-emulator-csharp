@@ -4,15 +4,15 @@ namespace GBMU;
 
 public class Gameboy
 {
-	private Cartridge _cartridge;
-	private Memory _memory;
+	public Cartridge cartridge { get; private set; }
+	public Memory memory { get; private set; }
 	public CPU cpu { get; private set; }
 
 	public Gameboy(System.IO.Stream romStream)
 	{
-		_cartridge = new Cartridge(romStream);
-		_memory = new Memory(_cartridge);
-		cpu = new CPU(_memory);
+		cartridge = new Cartridge(romStream);
+		memory = new Memory(cartridge);
+		cpu = new CPU(memory);
 	}
 
 	public void Update(float deltaTime)
