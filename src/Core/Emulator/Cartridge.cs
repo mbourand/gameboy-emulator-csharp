@@ -18,6 +18,7 @@ public class Cartridge
 	public ushort ReadWord(uint addr) => MemoryUtils.ReadWord(_rom, addr);
 
 	public void WriteByte(uint addr, byte value) => MemoryUtils.WriteByte(_rom, addr, value);
+	public void WriteWord(uint addr, ushort value) => MemoryUtils.WriteWord(_rom, addr, value);
 
 	public static MemoryKeyPoint EntryPoint = new MemoryKeyPoint(0x100, 4);
 	public static MemoryKeyPoint NintendoLogo = new MemoryKeyPoint(0x104, 48);

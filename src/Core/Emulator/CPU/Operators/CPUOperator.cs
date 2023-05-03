@@ -13,7 +13,6 @@ public abstract class CPUOperator
 
 	public virtual void Execute(CPU cpu, Memory memory, int opcode)
 	{
-		cpu.PC += length;
 	}
 
 	public virtual string ToString(CPU cpu, Memory memory, int opcode, ushort addr) => name.PadRight(4);
