@@ -1,10 +1,10 @@
 namespace GBMU.Core;
 
-public class OperatorJP : CPUOperator
+public class OperatorCALL : CPUOperator
 {
 	private OperationDataType _destinationDataType;
 
-	public OperatorJP(OperationDataType destinationDataType) : base("JP", 1)
+	public OperatorCALL(OperationDataType destinationDataType) : base("CALL", 1)
 	{
 		_destinationDataType = destinationDataType;
 		length += _destinationDataType.GetLength();
@@ -12,6 +12,7 @@ public class OperatorJP : CPUOperator
 
 	public override void Execute(CPU cpu, Memory memory, int opcode)
 	{
+		cpu.PushToStack((ushort)(cpu.PC + length));
 		cpu.PC = _destinationDataType.GetSourceValue(cpu, memory);
 		base.Execute(cpu, memory, opcode);
 	}

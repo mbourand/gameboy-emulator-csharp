@@ -7,7 +7,7 @@ public class FlagPermissionHandler
 	private Dictionary<CPUFlag, FlagPermission> _permissions;
 
 	public FlagPermissionHandler(Dictionary<CPUFlag, FlagPermission> permissions) => _permissions = permissions;
-	public FlagPermissionHandler(string permissions) => _permissions = FlagPermissionUtils.PermissionsFromString(permissions);
+	public FlagPermissionHandler(string permissions) => _permissions = FlagUtils.PermissionsFromString(permissions);
 
 	public void Apply(CPU cpu, Dictionary<CPUFlag, bool> tryValues)
 	{

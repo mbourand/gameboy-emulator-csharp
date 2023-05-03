@@ -1,12 +1,12 @@
 namespace GBMU.Core;
 
-public class OperatorJPFlag : CPUOperator
+public class OperatorCALLFlag : CPUOperator
 {
 	private CPUFlag _flag;
 	private bool _expectedValue;
 	private OperationDataType _destinationDataType;
 
-	public OperatorJPFlag(CPUFlag flag, bool expectedValue, OperationDataType destinationDataType) : base("JP", 1)
+	public OperatorCALLFlag(CPUFlag flag, bool expectedValue, OperationDataType destinationDataType) : base("CALL", 1)
 	{
 		_flag = flag;
 		_expectedValue = expectedValue;
@@ -17,7 +17,10 @@ public class OperatorJPFlag : CPUOperator
 	public override void Execute(CPU cpu, Memory memory, int opcode)
 	{
 		if (cpu.GetFlag(_flag) == _expectedValue)
+		{
+			cpu.PushToStack((ushort)(cpu.PC + length));
 			cpu.PC = _destinationDataType.GetSourceValue(cpu, memory);
+		}
 		base.Execute(cpu, memory, opcode);
 	}
 

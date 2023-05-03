@@ -27,8 +27,6 @@ public class OperatorJRFlag : CPUOperator
 
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr)
 	{
-		var negativePrefix = _expectedValue ? "" : "N";
-		var flagChar = _flag.GetChar();
-		return base.ToString() + $" ${negativePrefix}${flagChar}, ${_offsetDataType.GetMnemonic()}";
+		return base.ToString() + $" ${FlagUtils.FlagConditionToMnemonic(_flag, _expectedValue)}, ${_offsetDataType.GetMnemonic()}";
 	}
 }

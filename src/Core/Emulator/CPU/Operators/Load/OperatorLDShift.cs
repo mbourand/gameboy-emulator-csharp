@@ -9,13 +9,13 @@ public enum ShiftingBehaviour
 }
 
 // Cette classe effectue une opération de chargement de données selon le type de données source et de destination
-public class OperatorLoadShift : OperatorLoad
+public class OperatorLDShift : OperatorLD
 {
 
 	private ShiftingBehaviour _shiftingBehaviour;
 	private CPURegister _registerToShift;
 
-	public OperatorLoadShift(OperationDataType sourceDataType, OperationDataType destinationDataType, CPURegister registerToShift, ShiftingBehaviour shiftingBehaviour)
+	public OperatorLDShift(OperationDataType sourceDataType, OperationDataType destinationDataType, CPURegister registerToShift, ShiftingBehaviour shiftingBehaviour)
 		: base(sourceDataType, destinationDataType)
 	{
 		this._shiftingBehaviour = shiftingBehaviour;

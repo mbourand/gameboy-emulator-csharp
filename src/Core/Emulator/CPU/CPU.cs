@@ -94,6 +94,18 @@ public partial class CPU
 
 	public bool GetFlag(CPUFlag flag) => (_f & (byte)flag) != 0;
 
+	public void PushToStack(ushort value)
+	{
+		SP -= 2;
+		_memory.WriteWord(SP, value);
+	}
+
+	public ushort PopFromStack()
+	{
+		ushort value = _memory.ReadWord(SP);
+		SP += 2;
+		return value;
+	}
 
 	public string DebugString()
 	{
