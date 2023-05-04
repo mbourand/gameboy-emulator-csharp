@@ -53,7 +53,7 @@ public class TestLDShift : Test
 		TestLDShiftReg16AddressReg8(CPURegister.HL, CPURegister.A, Memory.WorkRAMBank0.addr, 0x42, ShiftingBehaviour.INCREMENT);
 		TestLDShiftReg16AddressReg8(CPURegister.HL, CPURegister.A, Memory.WorkRAMBank0.addr, 0x42, ShiftingBehaviour.DECREMENT);
 
-		Console.WriteLine("All LD tests passed");
+		Console.WriteLine("All LD Shift tests passed");
 	}
 
 	public void Expect(Gameboy gameboy, CPUOperator operation, bool condition)

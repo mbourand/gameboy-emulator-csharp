@@ -116,6 +116,13 @@ public class TestLD : Test
 		BaseTestLD(gameboy, new DataTypeReg16(sourceRegister), new DataTypeReg16(destinationRegister), sourceValue);
 	}
 
+	public void TestLDReg16U16Address(CPURegister sourceRegister, ushort destinationAddress, ushort sourceValue)
+	{
+		var gameboy = TestUtils.InitGameboy();
+		gameboy.cartridge.WriteWord((ushort)(gameboy.cpu.PC + 1), destinationAddress);
+		BaseTestLD(gameboy, new DataTypeReg16(sourceRegister), new DataTypeU16AddressWord(), sourceValue);
+	}
+
 	public override void Run()
 	{
 		var registers = new CPURegister[] { CPURegister.B, CPURegister.C, CPURegister.D, CPURegister.E, CPURegister.H, CPURegister.L, CPURegister.A };
@@ -163,6 +170,8 @@ public class TestLD : Test
 		TestLDU16Reg16(CPURegister.SP, 0x4269);
 
 		TestLDReg16Reg16(CPURegister.HL, CPURegister.SP, 0x4269);
+
+		TestLDReg16U16Address(CPURegister.SP, Memory.WorkRAMBank0.addr, 0x4269);
 
 		Console.WriteLine("All LD tests passed");
 	}
