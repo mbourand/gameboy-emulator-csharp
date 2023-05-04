@@ -5,7 +5,7 @@ namespace Tests;
 public static class TestSuite
 {
 	public static Test[] TestList = new Test[] {
-		new TestLD()
+		new TestLD(), new TestLDShift()
 	};
 
 	public static void Run()
