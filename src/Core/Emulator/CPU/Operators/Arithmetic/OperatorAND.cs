@@ -38,6 +38,6 @@ public class OperatorAND : CPUOperator
 
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr)
 	{
-		return base.ToString() + $" {_destinationDataType.GetMnemonic()}, {_sourceDataType.GetMnemonic()}";
+		return base.ToString(cpu, memory, opcode, addr) + $" {_destinationDataType.GetMnemonic()}, {_sourceDataType.GetMnemonic()}";
 	}
 }
