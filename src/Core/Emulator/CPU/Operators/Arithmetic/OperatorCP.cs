@@ -25,8 +25,8 @@ public class OperatorCP : CPUOperator
 		int halfResult = (destinationValue & 0xF) - (sourceValue & 0xF);
 		Dictionary<CPUFlag, bool> newFlags = new()
 		{
-			{CPUFlag.ZERO, result == 0},
-			{CPUFlag.N_SUBTRACT, true},
+			{ CPUFlag.ZERO, result == 0},
+			{ CPUFlag.N_SUBTRACT, true},
 			{ CPUFlag.CARRY, result < 0 },
 			{ CPUFlag.HALF_CARRY, halfResult < 0 },
 		};
