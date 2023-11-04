@@ -1,12 +1,15 @@
-﻿using GBMU;
+﻿using System;
+using GBMU;
+using GBMU.Core;
 using GBMU.UI;
 using Tests;
 
-// using var game = new GMBUWindow();
-// game.Run();
+// TestSuite.Run();
 
-/*var gameboy = new Gameboy(System.IO.File.OpenRead("resources/roms/Tetris.gb"));
-gameboy.Update(0);
-gameboy.cpu.DebugString();*/
+using var game = new GBMUWindow();
+game.Run();
 
-TestSuite.Run();
+// var gameboy = new Gameboy(System.IO.File.OpenRead("resources/roms/tests/cpu_instrs/individual/01-special.gb"));
+// while (true) {
+// 	gameboy.ForceCycle();
+// }

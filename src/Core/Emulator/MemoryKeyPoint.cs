@@ -1,18 +1,16 @@
 namespace GBMU.Core;
 
-public class MemoryKeyPoint
-{
-	public ushort addr { get; set; }
-	public ushort size { get; set; }
+public class MemoryKeyPoint {
+	public ushort Address;
+	public ushort Size;
 
-	public MemoryKeyPoint(ushort addr, ushort size)
-	{
-		this.addr = addr;
-		this.size = size;
+	public MemoryKeyPoint(ushort addr, ushort size) {
+		Address = addr;
+		Size = size;
 	}
 
-	public ushort EndAddr => (ushort)(addr + size - 1);
+	public ushort EndAddress => (ushort)(Address + Size - 1);
 
-	public bool IsInRange(ushort addr) => addr >= this.addr && addr <= EndAddr;
-	public ushort GetOffset(ushort addr) => (ushort)(addr - this.addr);
+	public bool IsInRange(ushort address) => address >= Address && address <= EndAddress;
+	public ushort GetOffset(ushort address) => (ushort)(address - Address);
 }

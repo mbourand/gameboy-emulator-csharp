@@ -1,7 +1,6 @@
 namespace GBMU.Core;
 
-public enum CPURegister
-{
+public enum CPURegister {
 	A,
 	B,
 	C,
@@ -16,15 +15,11 @@ public enum CPURegister
 	HL,
 	SP,
 	PC,
-	NONE = 0xFF
 }
 
-public partial class CPU
-{
-	public ushort Get16BitRegister(CPURegister register)
-	{
-		return register switch
-		{
+public partial class CPU {
+	public ushort Get16BitRegister(CPURegister register) {
+		return register switch {
 			CPURegister.AF => AF,
 			CPURegister.BC => BC,
 			CPURegister.DE => DE,
@@ -35,10 +30,8 @@ public partial class CPU
 		};
 	}
 
-	public void Set16BitRegister(CPURegister register, ushort value)
-	{
-		switch (register)
-		{
+	public void Set16BitRegister(CPURegister register, ushort value) {
+		switch (register) {
 			case CPURegister.AF:
 				AF = value;
 				break;
@@ -62,10 +55,8 @@ public partial class CPU
 		}
 	}
 
-	public byte Get8BitRegister(CPURegister register)
-	{
-		return register switch
-		{
+	public byte Get8BitRegister(CPURegister register) {
+		return register switch {
 			CPURegister.A => A,
 			CPURegister.B => B,
 			CPURegister.C => C,
@@ -77,10 +68,8 @@ public partial class CPU
 		};
 	}
 
-	public void Set8BitRegister(CPURegister register, byte value)
-	{
-		switch (register)
-		{
+	public void Set8BitRegister(CPURegister register, byte value) {
+		switch (register) {
 			case CPURegister.A:
 				A = value;
 				break;

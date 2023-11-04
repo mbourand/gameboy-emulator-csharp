@@ -3,13 +3,11 @@ using GBMU;
 
 namespace GBMU;
 
-public static class MemoryUtils
-{
+public static class MemoryUtils {
 	public static byte ReadByte(this byte[] memory, uint addr) => memory[addr];
 	public static ushort ReadWord(this byte[] memory, uint addr) => ByteUtils.FlipEndian(BitConverter.ToUInt16(memory, (int)addr));
 	public static void WriteByte(this byte[] memory, uint addr, byte value) => memory[addr] = value;
-	public static void WriteWord(this byte[] memory, uint addr, ushort value)
-	{
+	public static void WriteWord(this byte[] memory, uint addr, ushort value) {
 		var flipped = ByteUtils.FlipEndian(value);
 		memory[addr] = ByteUtils.HighByte(flipped);
 		memory[addr + 1] = ByteUtils.LowByte(flipped);

@@ -1,9 +1,8 @@
 namespace GBMU.Core;
 
 // Cette classe contient une logique générale permettant de charger et assigner des données via un registre 8 bits
-public class DataTypeReg8 : OperationDataType
-{
-	private CPURegister _register;
+public class DataTypeReg8 : OperationDataType {
+	private readonly CPURegister _register;
 
 	public DataTypeReg8(CPURegister register) => _register = register;
 

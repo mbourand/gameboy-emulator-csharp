@@ -2,18 +2,16 @@ using System.Collections.Generic;
 
 namespace GBMU.Core;
 
-public class OperatorADD : CPUOperator
-{
-	private OperationDataType _sourceDataType;
-	private OperationDataType _destinationDataType;
-	private FlagPermissionHandler _flagHandler;
-	private CarryBit _carryBit;
-	private HalfCarryBit _halfCarryBit;
-	private bool _isSourceSigned;
+public class OperatorADD : CPUOperator {
+	private readonly OperationDataType _sourceDataType;
+	private readonly OperationDataType _destinationDataType;
+	private readonly FlagPermissionHandler _flagHandler;
+	private readonly CarryBit _carryBit;
+	private readonly HalfCarryBit _halfCarryBit;
+	private readonly bool _isSourceSigned;
 
 	public OperatorADD(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler, CarryBit carryBit, HalfCarryBit halfCarryBit, bool isSourceSigned = false)
-		: base("ADD", 1)
-	{
+		: base("ADD", 1) {
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;
 		_carryBit = carryBit;
@@ -23,11 +21,10 @@ public class OperatorADD : CPUOperator
 		length += (byte)(_sourceDataType.GetLength() + _destinationDataType.GetLength());
 	}
 
-	public override void Execute(CPU cpu, Memory memory, int opcode)
-	{
+	public override void Execute(CPU cpu, Memory memory, int opcode) {
 		var sourceValue = _sourceDataType.GetSourceValue(cpu, memory);
 		var destinationValue = _destinationDataType.GetSourceValue(cpu, memory);
-		int signedSource = _isSourceSigned ? (sbyte)((byte)sourceValue) : sourceValue;
+		int signedSource = _isSourceSigned ? (sbyte)(byte)sourceValue : sourceValue;
 
 		ApplyFlags(cpu, signedSource, destinationValue);
 
@@ -37,8 +34,7 @@ public class OperatorADD : CPUOperator
 		base.Execute(cpu, memory, opcode);
 	}
 
-	private void ApplyFlags(CPU cpu, int a, int b)
-	{
+	private void ApplyFlags(CPU cpu, int a, int b) {
 		var halfCarryMask = (int)_halfCarryBit - 1;
 
 		int result = a + b;
@@ -46,17 +42,16 @@ public class OperatorADD : CPUOperator
 
 		Dictionary<CPUFlag, bool> newFlags = new()
 		{
-			{ CPUFlag.N_SUBTRACT, false },
-			{ CPUFlag.ZERO, (byte)result == 0x00 },
-			{ CPUFlag.CARRY, result >= (int)_carryBit },
-			{ CPUFlag.HALF_CARRY, halfResult > halfCarryMask },
+			{ CPUFlag.NSubtract, false },
+			{ CPUFlag.Zero, (byte)result == 0x00 },
+			{ CPUFlag.Carry, result > (int)_carryBit },
+			{ CPUFlag.HalfCarry, halfResult > halfCarryMask },
 		};
 
 		_flagHandler.Apply(cpu, newFlags);
 	}
 
-	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr)
-	{
-		return base.ToString() + $" ${_destinationDataType.GetMnemonic()}, ${_sourceDataType.GetMnemonic()}";
+	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) {
+		return base.ToString(cpu, memory, opcode, addr) + $" ${_destinationDataType.GetMnemonic()}, ${_sourceDataType.GetMnemonic()}";
 	}
 }

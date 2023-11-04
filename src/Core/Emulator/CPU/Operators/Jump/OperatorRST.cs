@@ -2,7 +2,7 @@ namespace GBMU.Core;
 
 public class OperatorRST : CPUOperator
 {
-	private ushort _address;
+	private readonly ushort _address;
 
 	public OperatorRST(ushort address) : base("RST", 1)
 	{
@@ -16,5 +16,7 @@ public class OperatorRST : CPUOperator
 		base.Execute(cpu, memory, opcode);
 	}
 
-	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) => base.ToString();
+	public override void ShiftPC(CPU cpu, Memory memory) { }
+
+	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) => base.ToString(cpu, memory, opcode, addr);
 }

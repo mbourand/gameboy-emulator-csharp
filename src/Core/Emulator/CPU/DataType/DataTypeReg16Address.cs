@@ -1,9 +1,8 @@
 namespace GBMU.Core;
 
 // Cette classe contient une logique générale permettant de charger et assigner des données via un registre 16 bits
-public class DataTypeReg16Address : OperationDataType
-{
-	private CPURegister _register;
+public class DataTypeReg16Address : OperationDataType {
+	private readonly CPURegister _register;
 
 	public DataTypeReg16Address(CPURegister register) => _register = register;
 

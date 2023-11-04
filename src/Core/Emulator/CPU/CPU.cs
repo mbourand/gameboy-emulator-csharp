@@ -1,91 +1,140 @@
 using System;
+using System.Collections.Generic;
 
 namespace GBMU.Core;
 
-public partial class CPU
-{
+public partial class CPU {
 	public byte A, B, C, D, E, H, L;
 	private byte _f;
-	private ushort _sp, _pc;
-	private Memory _memory;
+	private readonly Memory _memory;
 
-	public CPU(Memory memory)
-	{
-		InitializeRegisters();
-		_memory = memory;
+	public bool CBPrefix;
+	public bool Halted;
+	public bool Stopped;
+
+	public bool InterruptMasterEnable {
+		get; private set;
 	}
 
-	private void InitializeRegisters()
-	{
+	private bool _enableInterruptMasterNextCycle;
+
+	public void SetInterruptMasterEnable(bool value) {
+		if (value) {
+			_enableInterruptMasterNextCycle = true;
+		} else {
+			_enableInterruptMasterNextCycle = false;
+			InterruptMasterEnable = false;
+		}
+	}
+
+	private double _elapsedTime;
+
+	public CPU(Memory memory) {
+		InitializeRegisters();
+		_memory = memory;
+		_enableInterruptMasterNextCycle = false;
+	}
+
+	private void InitializeRegisters() {
 		AF = AFBaseValue;
 		BC = BCBaseValue;
 		DE = DEBaseValue;
 		HL = HLBaseValue;
 		SP = SPBaseValue;
 		PC = PCBaseValue;
+		InterruptMasterEnable = IMEBaseValue;
 	}
 
-	public ushort AF
-	{
+	public ushort AF {
 		get => ByteUtils.MakeWord(A, _f);
 		set => Set16BitRegister(ref A, ref _f, value);
 	}
 
-	public ushort BC
-	{
+	public ushort BC {
 		get => ByteUtils.MakeWord(B, C);
 		set => Set16BitRegister(ref B, ref C, value);
 	}
 
-	public ushort DE
-	{
+	public ushort DE {
 		get => ByteUtils.MakeWord(D, E);
 		set => Set16BitRegister(ref D, ref E, value);
 	}
 
-	public ushort HL
-	{
+	public ushort HL {
 		get => ByteUtils.MakeWord(H, L);
 		set => Set16BitRegister(ref H, ref L, value);
 	}
 
-	public ushort SP
-	{
-		get => _sp;
-		set => _sp = value;
+	public ushort SP;
+	public ushort PC;
+
+	// Handle the 1 cycle delay of EI instruction
+	public void HandleInterruptMasterEnableDelay() {
+		if (_enableInterruptMasterNextCycle == true)
+			InterruptMasterEnable = true;
+		_enableInterruptMasterNextCycle = false;
 	}
 
-	public ushort PC
-	{
-		get => _pc;
-		set => _pc = value;
-	}
+	private HashSet<byte> opcodes = new();
+	public void Cycle() {
+		HandleInterruptMasterEnableDelay();
 
-	public void Cycle()
-	{
 		// Fetch
-		byte opcode = _memory.ReadByte(_pc);
+		byte opcode = _memory.ReadByte(PC);
 
 		// Decode
-		CPUOperator instruction = InstructionSet.GetInstruction(opcode);
+		CPUOperator instruction = CBPrefix ? InstructionSet.GetCBInstruction(opcode) : InstructionSet.GetInstruction(opcode);
+		if (!opcodes.Contains(opcode)) {
+			Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
+			opcodes.Add(opcode);
+		}
+		CBPrefix = false;
 
 		// Execute
 		instruction.Execute(this, _memory, opcode);
+		instruction.ShiftPC(this, _memory);
+
+		HandleInterrupts();
 	}
 
-	private void Set16BitRegister(ref byte high, ref byte low, ushort value)
-	{
+	public void HandleInterrupts() {
+		if (!InterruptMasterEnable)
+			return;
+
+		byte enabledInterrupts = _memory.ReadByte(Memory.InterruptEnableRegister.Address);
+		byte triggeredInterrupts = _memory.ReadByte(Memory.InterruptFlagRegister.Address);
+
+		InterruptByte interruptsToRun = new((byte)(enabledInterrupts & triggeredInterrupts));
+		var highestPriorityInterrupt = InterruptUtils.GetHighestPriorityInterrupt(interruptsToRun);
+
+		if (highestPriorityInterrupt.HasValue) {
+			InterruptMasterEnable = false;
+			byte newInterruptFlag = (byte)(triggeredInterrupts & ~(byte)highestPriorityInterrupt.Value);
+			_memory.WriteByte(Memory.InterruptFlagRegister.Address, newInterruptFlag);
+
+			PushToStack(PC);
+			PC = InterruptUtils.GetVectorFromInterrupt(highestPriorityInterrupt.Value).Address;
+		}
+	}
+
+	public void Update(double deltaTime) {
+		_elapsedTime += deltaTime;
+		while (_elapsedTime >= CycleDuration) {
+			Cycle();
+			_elapsedTime -= CycleDuration;
+		}
+	}
+
+	private static void Set16BitRegister(ref byte high, ref byte low, ushort value) {
 		high = ByteUtils.HighByte(value);
 		low = ByteUtils.LowByte(value);
 	}
 
-	public void ResetFlags()
-	{
+	public void ResetFlags() {
 		_f = 0;
 	}
 
-	public void SetFlag(CPUFlag flag, bool value)
-	{
+	public void SetFlag(CPUFlag flag, bool value) {
 		if (value)
 			_f |= (byte)flag;
 		else
@@ -94,29 +143,31 @@ public partial class CPU
 
 	public bool GetFlag(CPUFlag flag) => (_f & (byte)flag) != 0;
 
-	public void PushToStack(ushort value)
-	{
+	public void PushToStack(ushort value) {
 		SP -= 2;
 		_memory.WriteWord(SP, value);
 	}
 
-	public ushort PopFromStack()
-	{
+	public ushort PopFromStack() {
 		ushort value = _memory.ReadWord(SP);
 		SP += 2;
 		return value;
 	}
 
-	public string DebugString()
-	{
+	public string DebugString() {
 		string debugString = $"AF: {AF:X4} BC: {BC:X4} DE: {DE:X4} HL: {HL:X4} SP: {SP:X4} PC: {PC:X4} F: {Convert.ToString(_f, 2).PadLeft(8, '0')}";
 		return debugString;
 	}
 
-	public static ushort AFBaseValue = 0x01B0;
-	public static ushort BCBaseValue = 0x0013;
-	public static ushort DEBaseValue = 0x00D8;
-	public static ushort HLBaseValue = 0x014D;
-	public static ushort SPBaseValue = 0xFFFE;
-	public static ushort PCBaseValue = 0x0100;
+	public const ushort AFBaseValue = 0x01B0;
+	public const ushort BCBaseValue = 0x0013;
+	public const ushort DEBaseValue = 0x00D8;
+	public const ushort HLBaseValue = 0x014D;
+	public const ushort SPBaseValue = 0xFFFE;
+	public const ushort PCBaseValue = 0x0100;
+
+	public const bool IMEBaseValue = false;
+
+	public const float ClockSpeed = 4194304f;
+	public const float CycleDuration = 1f / ClockSpeed;
 }

@@ -1,14 +1,12 @@
 namespace GBMU.Core;
 
-public class OperatorSCF : CPUOperator
-{
+public class OperatorSCF : CPUOperator {
 	public OperatorSCF() : base("SCF", 1) { }
 
-	public override void Execute(CPU cpu, Memory memory, int opcode)
-	{
-		cpu.SetFlag(CPUFlag.N_SUBTRACT, false);
-		cpu.SetFlag(CPUFlag.HALF_CARRY, false);
-		cpu.SetFlag(CPUFlag.CARRY, true);
+	public override void Execute(CPU cpu, Memory memory, int opcode) {
+		cpu.SetFlag(CPUFlag.NSubtract, false);
+		cpu.SetFlag(CPUFlag.HalfCarry, false);
+		cpu.SetFlag(CPUFlag.Carry, true);
 		base.Execute(cpu, memory, opcode);
 	}
 }
