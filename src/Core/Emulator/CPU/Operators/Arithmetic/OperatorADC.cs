@@ -22,10 +22,11 @@ public class OperatorADC : CPUOperator {
 	public override void Execute(CPU cpu, Memory memory, int opcode) {
 		var sourceValue = _sourceDataType.GetSourceValue(cpu, memory);
 		var destinationValue = _destinationDataType.GetSourceValue(cpu, memory);
+		int carryValue = cpu.GetFlag(CPUFlag.Carry) ? 1 : 0;
 
 		ApplyFlags(cpu, sourceValue, destinationValue);
 
-		var result = (ushort)(sourceValue + destinationValue + (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0));
+		var result = (ushort)(sourceValue + destinationValue + carryValue);
 		_destinationDataType.WriteToDestination(cpu, memory, result);
 
 		base.Execute(cpu, memory, opcode);

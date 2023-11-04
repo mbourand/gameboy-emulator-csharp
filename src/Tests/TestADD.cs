@@ -36,10 +36,6 @@ public class TestADD : Test {
 
 		var valueWasSet = expectedOutput == destination.GetSourceValue(gameboy.CPU, gameboy.Memory);
 		var flagsWereSet = CheckFlags(expectedFlags, gameboy.CPU);
-		Console.WriteLine(expectedOutput + " " + destination.GetSourceValue(gameboy.CPU, gameboy.Memory));
-		foreach (var flag in expectedFlags.Keys)
-			Console.WriteLine(flag + " " + gameboy.CPU.GetFlag(flag) + " " + expectedFlags[flag]);
-		Console.WriteLine("--------------------");
 		Expect(gameboy, operation, valueWasSet && flagsWereSet, sourceValue, destinationValue);
 	}
 

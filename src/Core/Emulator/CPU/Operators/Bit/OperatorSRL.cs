@@ -20,7 +20,7 @@ public class OperatorSRL : CPUOperator {
 		var flags = new Dictionary<CPUFlag, bool>()
 		{
 			{ CPUFlag.Zero, result == 0 },
-			{ CPUFlag.Carry, (sourceValue & 0b0000_0001) != 0 },
+			{ CPUFlag.Carry, (sourceValue & 0b0000_0001) == 1 },
 		};
 		_flagPermissionHandler.Apply(cpu, flags);
 

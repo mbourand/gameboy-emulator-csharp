@@ -22,10 +22,11 @@ public class OperatorSBC : CPUOperator {
 	public override void Execute(CPU cpu, Memory memory, int opcode) {
 		var sourceValue = _sourceDataType.GetSourceValue(cpu, memory);
 		var destinationValue = _destinationDataType.GetSourceValue(cpu, memory);
+		int carryValue = cpu.GetFlag(CPUFlag.Carry) ? 1 : 0;
 
 		ApplyFlags(cpu, sourceValue, destinationValue);
 
-		var result = (ushort)(destinationValue - sourceValue - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0));
+		var result = (ushort)(destinationValue - sourceValue - carryValue);
 		_destinationDataType.WriteToDestination(cpu, memory, result);
 
 		base.Execute(cpu, memory, opcode);
@@ -34,7 +35,7 @@ public class OperatorSBC : CPUOperator {
 	private void ApplyFlags(CPU cpu, int sourceValue, int destinationValue) {
 		var halfCarryMask = (int)_halfCarryBit - 1;
 
-		var result = (ushort)(destinationValue - sourceValue - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0));
+		int result = destinationValue - sourceValue - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
 		int halfResult = (destinationValue & halfCarryMask) - (sourceValue & halfCarryMask) - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
 
 		Dictionary<CPUFlag, bool> newFlags = new()
