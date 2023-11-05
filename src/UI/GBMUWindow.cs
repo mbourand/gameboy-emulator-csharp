@@ -1,4 +1,6 @@
-﻿using GBMU.Core;
+﻿using System;
+using System.Threading;
+using GBMU.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -10,6 +12,10 @@ public class GBMUWindow : Game {
 	private SpriteBatch _spriteBatch;
 
 	private Gameboy _gameboy;
+
+	private Thread _gameboyThread;
+
+	bool _exit = false;
 
 	public GBMUWindow() {
 		Window.Title = "GBMU";
@@ -33,6 +39,17 @@ public class GBMUWindow : Game {
 	private void InitializeGameboy() {
 		var romStream = System.IO.File.OpenRead(System.Environment.GetCommandLineArgs()[1]);
 		_gameboy = new Gameboy(romStream);
+
+		_gameboyThread = new Thread(() => {
+			var lastFrame = DateTime.Now;
+			while (!_exit) {
+				var now = DateTime.Now;
+				_gameboy.Update((now - lastFrame).TotalSeconds);
+				lastFrame = now;
+			}
+		});
+
+		_gameboyThread.Start();
 	}
 
 	protected override void LoadContent() {
@@ -40,18 +57,27 @@ public class GBMUWindow : Game {
 	}
 
 	protected override void Update(GameTime gameTime) {
-		if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
+		if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
 			Exit();
-
-		_gameboy.Update(gameTime.ElapsedGameTime.TotalSeconds);
+		}
 		base.Update(gameTime);
+	}
+
+	protected override void OnExiting(object sender, EventArgs args) {
+		_exit = true;
+		_gameboyThread.Join();
+		base.OnExiting(sender, args);
+	}
+
+	protected override void UnloadContent() {
+		base.UnloadContent();
 	}
 
 	protected override void Draw(GameTime gameTime) {
 		GraphicsDevice.Clear(Color.Black);
 
 		Color[] colors = new Color[WindowWidth * WindowHeight];
-		var ppuPixels = _gameboy.PPU.GetScreen();
+		var ppuPixels = _gameboy.PPU.GetDisplayScreen();
 		for (int y = 0; y < PPU.ScreenHeight; y++)
 			for (int x = 0; x < PPU.ScreenWidth; x++)
 				colors[y * PPU.ScreenWidth + x] = new Color(ppuPixels[y][x]);

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 namespace GBMU.Core;
@@ -36,8 +37,9 @@ public class OperatorADD : CPUOperator {
 
 	private void ApplyFlags(CPU cpu, int a, int b) {
 		var halfCarryMask = (int)_halfCarryBit - 1;
+		var carryMask = (int)_carryBit - 1;
 
-		int result = a + b;
+		int result = (a & carryMask) + (b & carryMask);
 		int halfResult = (a & halfCarryMask) + (b & halfCarryMask);
 
 		Dictionary<CPUFlag, bool> newFlags = new()

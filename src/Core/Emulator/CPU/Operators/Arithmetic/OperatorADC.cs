@@ -34,8 +34,9 @@ public class OperatorADC : CPUOperator {
 
 	private void ApplyFlags(CPU cpu, int sourceValue, int destinationValue) {
 		var halfCarryMask = (int)_halfCarryBit - 1;
+		var carryMask = (int)_carryBit - 1;
 
-		int result = destinationValue + sourceValue + (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
+		int result = (destinationValue & carryMask) + (sourceValue & carryMask) + (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
 		int halfResult = (destinationValue & halfCarryMask) + (sourceValue & halfCarryMask) + (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
 
 		Dictionary<CPUFlag, bool> newFlags = new()

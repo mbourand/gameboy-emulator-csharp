@@ -74,12 +74,12 @@ public class Memory {
 		return MemoryUtils.ReadByte(_memory, addr);
 	}
 
-
 	public void WriteByte(ushort addr, byte value) {
+		if (addr == DIV.Address) {
+			MemoryUtils.WriteByte(_memory, addr, 0);
+			return;
+		}
 		MemoryUtils.WriteByte(_memory, addr, value);
-		// Write handled by MBC
-		if (Echo.IsInRange(addr))
-			MemoryUtils.RedirectedWriteByte(_memory, addr, Echo.Address, ROMBank0.Address, value);
 	}
 
 	public ushort ReadWord(ushort addr) {
@@ -105,6 +105,12 @@ public class Memory {
 			dump += $"{ReadByte((ushort)i):X2} ";
 		}
 		return dump;
+	}
+
+	public void RequestInterrupt(Interrupt interrupt) {
+		byte interruptFlag = ReadByte(InterruptFlagRegister.Address);
+		interruptFlag |= (byte)interrupt;
+		WriteByte(InterruptFlagRegister.Address, interruptFlag);
 	}
 
 	public static readonly MemoryKeyPoint InterruptVectorVBlank = new(0x0040, 1);

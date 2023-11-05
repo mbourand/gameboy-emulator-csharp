@@ -27,6 +27,8 @@ public class OperatorJPFlag : CPUOperator {
 			base.ShiftPC(cpu, memory);
 	}
 
+	public override int GetCycles(bool cbPrefix, byte opcode) => _branched ? 16 : 12;
+
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) {
 		return base.ToString(cpu, memory, opcode, addr) + $" {FlagUtils.FlagConditionToMnemonic(_flag, _expectedValue)}, ${_destinationDataType.GetMnemonic()}";
 	}

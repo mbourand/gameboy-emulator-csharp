@@ -18,6 +18,7 @@ public partial class CPU {
 	}
 
 	private bool _enableInterruptMasterNextCycle;
+	private int _cycleWaitTime;
 
 	public void SetInterruptMasterEnable(bool value) {
 		if (value) {
@@ -33,7 +34,12 @@ public partial class CPU {
 	public CPU(Memory memory) {
 		InitializeRegisters();
 		_memory = memory;
+		_elapsedTime = 0;
 		_enableInterruptMasterNextCycle = false;
+		_cycleWaitTime = 0;
+		Halted = false;
+		Stopped = false;
+		CBPrefix = false;
 	}
 
 	private void InitializeRegisters() {
@@ -76,38 +82,51 @@ public partial class CPU {
 		_enableInterruptMasterNextCycle = false;
 	}
 
-	private HashSet<byte> opcodes = new();
+	// private HashSet<byte> opcodes = new();
+
 	public void Cycle() {
+		if (_cycleWaitTime > 0) {
+			_cycleWaitTime--;
+			return;
+		}
+
 		HandleInterruptMasterEnableDelay();
 
-		// Fetch
-		byte opcode = _memory.ReadByte(PC);
+		if (!Halted && !Stopped) {
+			// Fetch
+			byte opcode = _memory.ReadByte(PC);
 
-		// Decode
-		CPUOperator instruction = CBPrefix ? InstructionSet.GetCBInstruction(opcode) : InstructionSet.GetInstruction(opcode);
-		// if (!opcodes.Contains(opcode)) {
-		// 	Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
-		// 	opcodes.Add(opcode);
-		// }
-		CBPrefix = false;
+			// Decode
+			CPUOperator instruction = CBPrefix ? InstructionSet.GetCBInstruction(opcode) : InstructionSet.GetInstruction(opcode);
+			_cycleWaitTime = instruction.GetCycles(CBPrefix, opcode);
+			// if (!opcodes.Contains(opcode)) {
+			// 	Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
+			// 	opcodes.Add(opcode);
+			// }
+			CBPrefix = false;
 
-		// Execute
-		var tmpPC = PC;
-		instruction.Execute(this, _memory, opcode);
-		instruction.ShiftPC(this, _memory);
-		// File.AppendAllText("instructions.txt", $"0x{tmpPC:X4}: " + instruction.ToString(this, _memory, opcode, 0x00) + "\n");
+			// Execute
+			// var tmpPC = PC;
+			instruction.Execute(this, _memory, opcode);
+			instruction.ShiftPC(this, _memory);
+			// File.AppendAllText("instructions.txt", $"0x{tmpPC:X4}: " + instruction.ToString(this, _memory, opcode, 0x00) + "\n");
+		}
 
 		HandleInterrupts();
 	}
 
 	public void HandleInterrupts() {
-		if (!InterruptMasterEnable)
-			return;
-
 		byte enabledInterrupts = _memory.ReadByte(Memory.InterruptEnableRegister.Address);
 		byte triggeredInterrupts = _memory.ReadByte(Memory.InterruptFlagRegister.Address);
 
 		InterruptByte interruptsToRun = new((byte)(enabledInterrupts & triggeredInterrupts));
+		if (!interruptsToRun.IsEmpty) {
+			Halted = false;
+			Stopped = false;
+		}
+
+		if (!InterruptMasterEnable)
+			return;
 		var highestPriorityInterrupt = InterruptUtils.GetHighestPriorityInterrupt(interruptsToRun);
 
 		if (highestPriorityInterrupt.HasValue) {
@@ -122,7 +141,7 @@ public partial class CPU {
 
 	public void Update(double deltaTime) {
 		_elapsedTime += deltaTime;
-		while (_elapsedTime >= CycleDuration) {
+		if (_elapsedTime >= CycleDuration) {
 			Cycle();
 			_elapsedTime -= CycleDuration;
 		}
@@ -157,10 +176,7 @@ public partial class CPU {
 		return value;
 	}
 
-	public string DebugString() {
-		string debugString = $"AF: {AF:X4} BC: {BC:X4} DE: {DE:X4} HL: {HL:X4} SP: {SP:X4} PC: {PC:X4} F: {Convert.ToString(_f, 2).PadLeft(8, '0')}";
-		return debugString;
-	}
+	public string DebugString() => $"AF: {AF:X4} BC: {BC:X4} DE: {DE:X4} HL: {HL:X4} SP: {SP:X4} PC: {PC:X4} F: {Convert.ToString(_f, 2).PadLeft(8, '0')}";
 
 	public const ushort AFBaseValue = 0x01B0;
 	public const ushort BCBaseValue = 0x0013;

@@ -24,6 +24,7 @@ public class DataTypeU8Address : OperationDataType {
 	}
 
 	public byte GetLength() => 1;
+
 	public string GetMnemonic() {
 		if (_lastRegisteredValue.HasValue) {
 			return $"(0xFF00 + U8) {{0x{_lastRegisteredValue.Value:X2}}}";

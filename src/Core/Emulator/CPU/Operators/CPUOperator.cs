@@ -16,5 +16,7 @@ public abstract class CPUOperator {
 		cpu.PC += length;
 	}
 
+	public virtual int GetCycles(bool cbPrefix, byte opcode) => cbPrefix ? InstructionSet.GetCBInstructionCycles(opcode) : InstructionSet.GetInstructionCycles(opcode);
+
 	public virtual string ToString(CPU cpu, Memory memory, int opcode, ushort addr) => name.PadRight(4);
 }

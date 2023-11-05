@@ -5,7 +5,7 @@ public class OperatorRRA : CPUOperator {
 
 	public override void Execute(CPU cpu, Memory memory, int opcode) {
 		bool wasCarrySet = cpu.GetFlag(CPUFlag.Carry);
-		bool willOverflow = (cpu.A & 0b0000_0001) == 1;
+		bool willOverflow = (cpu.A & 0b0000_0001) != 0;
 		cpu.ResetFlags();
 		cpu.SetFlag(CPUFlag.Carry, willOverflow);
 		cpu.A = (byte)((cpu.A >> 1) | (wasCarrySet ? 0b1000_0000 : 0));

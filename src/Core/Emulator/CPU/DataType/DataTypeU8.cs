@@ -19,6 +19,7 @@ public class DataTypeU8 : OperationDataType {
 	public void WriteToDestination(CPU cpu, Memory memory, ushort value) => throw new Exception("Cannot write to U8 if not address");
 
 	public byte GetLength() => 1;
+
 	public string GetMnemonic() {
 		if (_lastRegisteredValue.HasValue) {
 			return $"U8 {{0x{_lastRegisteredValue.Value:X2}}}";

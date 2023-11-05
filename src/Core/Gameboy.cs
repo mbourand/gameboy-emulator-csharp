@@ -17,20 +17,21 @@ public class Gameboy {
 		get; private set;
 	}
 
+	public Timers Timers {
+		get; private set;
+	}
+
 	public Gameboy(Stream romStream) {
 		Cartridge = new Cartridge(romStream);
 		Memory = new Memory(Cartridge);
 		CPU = new CPU(Memory);
 		PPU = new PPU(Memory);
+		Timers = new Timers(CPU, Memory);
 	}
 
 	public void Update(double deltaTime) {
+		Timers.Update(deltaTime);
 		CPU.Update(deltaTime);
 		PPU.Update(deltaTime);
-	}
-
-	public void ForceCycle() {
-		CPU.Cycle();
-		PPU.Cycle();
 	}
 }

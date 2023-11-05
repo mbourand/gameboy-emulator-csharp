@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.VisualBasic;
 
 namespace GBMU.Core;
@@ -13,7 +14,7 @@ public partial class PPU {
 
 	private readonly Memory _memory;
 	private State _state;
-	private readonly uint[][] _screen;
+
 	private readonly OAMEntry[] _oamEntries;
 	private readonly List<OAMEntry> _selectedOamEntries = new();
 
@@ -21,6 +22,8 @@ public partial class PPU {
 	private double _elapsedTime;
 
 	private int _winLineCounter;
+	private bool _wasDisplayEnabled;
+	private readonly PPUScreens _screens;
 
 	public PPU(Memory memory) {
 		_memory = memory;
@@ -29,25 +32,18 @@ public partial class PPU {
 		_stateCycleCounter = 0;
 		_winLineCounter = 0;
 
-		_screen = new uint[ScreenHeight][];
-		for (int i = 0; i < ScreenHeight; i++)
-			_screen[i] = new uint[ScreenWidth];
-
-		for (int i = 0; i < ScreenHeight; i++)
-			for (int j = 0; j < 144; j++)
-				_screen[i][j] = White;
-
 		_oamEntries = new OAMEntry[40];
+		_screens = new PPUScreens(ScreenWidth, ScreenHeight);
 	}
 
 	public LCDC GetCurrentLCDC() => new(_memory.ReadByte(Memory.LCDC.Address));
 	public LCDStatus GetCurrentLCDStatus() => new(_memory.ReadByte(Memory.STAT.Address));
 
-	public uint[][] GetScreen() => _screen;
+	public uint[][] GetDisplayScreen() => _screens.GetDisplayScreen();
 
 	public void Update(double deltaTime) {
 		_elapsedTime += deltaTime;
-		while (_elapsedTime >= CycleDuration) {
+		if (_elapsedTime >= CycleDuration) {
 			_elapsedTime -= CycleDuration;
 			Cycle();
 		}
@@ -56,6 +52,7 @@ public partial class PPU {
 	public void Cycle() {
 		LCDC lcdc = GetCurrentLCDC();
 		if (!lcdc.IsDisplayEnabled) {
+			_wasDisplayEnabled = false;
 			_state = State.OAMSearch;
 			_memory.WriteByte(Memory.LY.Address, 0);
 			_selectedOamEntries.Clear();
@@ -63,6 +60,11 @@ public partial class PPU {
 			_stateCycleCounter = 0;
 			_winLineCounter = 0;
 			return;
+		}
+		if (!_wasDisplayEnabled) {
+			for (int i = 0; i < ScreenHeight; i++)
+				for (int j = 0; j < ScreenWidth; j++)
+					_screens.SetPixel(0, (uint)i, White);
 		}
 
 		switch (_state) {
@@ -118,7 +120,7 @@ public partial class PPU {
 			byte tileNumber = _memory.ReadByte((ushort)(oamAddress + 2));
 			byte attributes = _memory.ReadByte((ushort)(oamAddress + 3));
 
-			var entry = new OAMEntry(y, x, tileNumber, attributes);
+			var entry = new OAMEntry(x, y, tileNumber, attributes);
 			_oamEntries[i] = entry;
 		}
 	}
@@ -143,43 +145,50 @@ public partial class PPU {
 			return;
 
 		byte lineY = _memory.ReadByte(Memory.LY.Address, false);
-
-		byte scrollX = _memory.ReadByte(Memory.SCX.Address);
-		byte scrollY = _memory.ReadByte(Memory.SCY.Address);
-		byte windowX = _memory.ReadByte(Memory.WX.Address);
-		byte windowY = _memory.ReadByte(Memory.WY.Address);
 		LCDC lcdc = GetCurrentLCDC();
 
-		bool useWindowThisLine = lcdc.IsWindowEnabled && lcdc.IsBackgroundAndWindowEnable && windowY <= lineY;
-
 		for (byte x = 0; x < ScreenWidth; x++) {
-			bool useWindowThisPixel = useWindowThisLine && windowX <= x;
-			ushort tileMapAddress = useWindowThisPixel ? lcdc.WindowTileMap : lcdc.BackgroundTileMap;
+			if (!_wasDisplayEnabled)
+				break;
 
-			byte yPosition = useWindowThisPixel ? (byte)(_winLineCounter - 1) : (byte)(lineY + scrollY);
-			byte xPosition = useWindowThisPixel ? (byte)(x - windowX) : (byte)(x + scrollX);
-			byte tileRow = (byte)(yPosition / 8);
-			byte tileColumn = (byte)(xPosition / 8);
+			byte colorDrewByBackgroundOrWindow = 0;
+			if (lcdc.IsBackgroundAndWindowEnable) {
+				colorDrewByBackgroundOrWindow = GetBgWinColor(x, lineY);
+				_screens.SetPixel(x, lineY, GetColorFromPalette(Memory.BGP.Address, colorDrewByBackgroundOrWindow));
+			}
 
-			ushort tileAddressInMap = (ushort)(tileMapAddress + tileRow * 32 + tileColumn);
-			short tileOffsetInData = _memory.ReadByte(tileAddressInMap);
+			if (lcdc.IsObjectEnabled) {
+				OAMEntry selectedEntry = FindOAMEntry(x, colorDrewByBackgroundOrWindow);
+				if (selectedEntry == null)
+					continue;
 
-			ushort tileAddressInData = lcdc.BackgroundTileSet;
-			if (lcdc.BackgroundTileSet == 0x8000)
-				tileAddressInData += (ushort)(tileOffsetInData * 16);
-			else
-				tileAddressInData += (ushort)((sbyte)tileOffsetInData * 16);
+				short entryPositionX = (short)(selectedEntry.X - 8);
+				short entryPositionY = (short)(selectedEntry.Y - 16);
+				byte tileIndex = lcdc.ObjectSize == 16 ? (byte)(selectedEntry.Tile & 0xFE) : selectedEntry.Tile;
+				byte tileLine = (byte)((lineY - entryPositionY) % lcdc.ObjectSize);
+				if (selectedEntry.Flags.IsFlippedY)
+					tileLine = (byte)(lcdc.ObjectSize - tileLine - 1);
 
-			byte tileLine = (byte)(yPosition % 8);
-			byte tileColumnInLine = (byte)(xPosition % 8);
+				if (tileLine >= 8) {
+					tileLine -= 8;
+					tileIndex |= 0x01;
+				}
 
-			byte tileDataLow = _memory.ReadByte((ushort)(tileAddressInData + tileLine * 2));
-			byte tileDataHigh = _memory.ReadByte((ushort)(tileAddressInData + tileLine * 2 + 1));
+				byte tileColumn = (byte)((x - entryPositionX) % 8);
+				ushort tileAddressInData = (ushort)(Memory.VRAM.Address + tileIndex * 16 + tileLine * 2);
 
-			byte colorIndex = (byte)(((tileDataHigh >> (7 - tileColumnInLine)) & 0b1) << 1);
-			colorIndex |= (byte)((tileDataLow >> (7 - tileColumnInLine)) & 0b1);
+				byte tileDataLow = _memory.ReadByte(tileAddressInData);
+				byte tileDataHigh = _memory.ReadByte((ushort)(tileAddressInData + 1));
 
-			_screen[lineY][x] = GetColorFromPalette(colorIndex);
+				if (!selectedEntry.Flags.IsFlippedX)
+					tileColumn = (byte)(7 - tileColumn);
+
+				byte colorId = (byte)((((tileDataHigh >> tileColumn) & 0b1) << 1) | ((tileDataLow >> tileColumn) & 0b1));
+				ushort paletteAddress = selectedEntry.Flags.Palette.Address;
+				if (colorId == 0)
+					continue;
+				_screens.SetPixel(x, lineY, GetColorFromPalette(paletteAddress, colorId));
+			}
 		}
 
 		_state = State.HBlank;
@@ -187,18 +196,73 @@ public partial class PPU {
 		UpdateLCDStatus(new() { LCDStatus.LCDStatusInterrupts.HBlankInt });
 	}
 
+	private OAMEntry FindOAMEntry(byte x, int colorDrewByBackgroundOrWindow) {
+		int? minX = null;
+		OAMEntry selectedEntry = null;
+		foreach (var entry in _selectedOamEntries) {
+			if (entry.Flags.IsBehindBackground && colorDrewByBackgroundOrWindow != 0)
+				continue;
+
+			short entryPositionX = (short)(entry.X - 8);
+			if (x >= entryPositionX && x < entryPositionX + 8 && (!minX.HasValue || entryPositionX < minX.Value)) {
+				selectedEntry = entry;
+				minX = entryPositionX;
+			}
+		}
+		return selectedEntry;
+	}
+
+	private byte GetBgWinColor(byte x, byte lineY) {
+		LCDC lcdc = GetCurrentLCDC();
+		byte scrollX = _memory.ReadByte(Memory.SCX.Address);
+		byte scrollY = _memory.ReadByte(Memory.SCY.Address);
+		byte windowX = (byte)(_memory.ReadByte(Memory.WX.Address) - 7);
+		byte windowY = _memory.ReadByte(Memory.WY.Address);
+
+		bool useWindowThisLine = lcdc.IsWindowEnabled && lcdc.IsBackgroundAndWindowEnable && windowY <= lineY;
+		bool useWindowThisPixel = useWindowThisLine && windowX <= x;
+
+		ushort tileMapAddress = useWindowThisPixel ? lcdc.WindowTileMap : lcdc.BackgroundTileMap;
+
+		byte yPosition = useWindowThisPixel ? (byte)(_winLineCounter - 1) : (byte)(lineY + scrollY);
+		byte xPosition = useWindowThisPixel ? (byte)(x - windowX) : (byte)(x + scrollX);
+		byte tileRow = (byte)(yPosition / 8);
+		byte tileColumn = (byte)(xPosition / 8);
+
+		ushort tileAddressInMap = (ushort)(tileMapAddress + tileRow * 32 + tileColumn);
+		short tileOffsetInData = _memory.ReadByte(tileAddressInMap);
+
+		ushort tileAddressInData = lcdc.BackgroundTileSet;
+		if (lcdc.BackgroundTileSet == 0x8000)
+			tileAddressInData += (ushort)(tileOffsetInData * 16);
+		else
+			tileAddressInData += (ushort)((sbyte)tileOffsetInData * 16);
+
+		byte tileLine = (byte)(yPosition % 8);
+		byte tileColumnInLine = (byte)(xPosition % 8);
+
+		byte tileDataLow = _memory.ReadByte((ushort)(tileAddressInData + tileLine * 2));
+		byte tileDataHigh = _memory.ReadByte((ushort)(tileAddressInData + tileLine * 2 + 1));
+
+		byte colorIndex = (byte)(((tileDataHigh >> (7 - tileColumnInLine)) & 0b1) << 1);
+		colorIndex |= (byte)((tileDataLow >> (7 - tileColumnInLine)) & 0b1);
+
+		return colorIndex;
+	}
+
 	private void CycleHBlank() {
 		if (!TickDelay(51))
 			return;
 
 		byte lineY = _memory.ReadByte(Memory.LY.Address, false);
-		_state = lineY == 144 ? State.VBlank : State.OAMSearch;
+		_state = lineY == ScreenHeight ? State.VBlank : State.OAMSearch;
 		if (_state == State.VBlank) {
-			var newIf = (byte)(_memory.ReadByte(Memory.InterruptFlagRegister.Address) | (byte)Interrupt.VBlank);
-			_memory.WriteByte(Memory.InterruptFlagRegister.Address, newIf);
+			_memory.RequestInterrupt(Interrupt.VBlank);
+			_screens.Swap();
+			_wasDisplayEnabled = true;
 		}
 
-		var stateInterruptToCheck = lineY == 144 ? LCDStatus.LCDStatusInterrupts.VBlankInt : LCDStatus.LCDStatusInterrupts.OAMSearchInt;
+		var stateInterruptToCheck = lineY == ScreenHeight ? LCDStatus.LCDStatusInterrupts.VBlankInt : LCDStatus.LCDStatusInterrupts.OAMSearchInt;
 		UpdateLCDStatus(new() {
 			stateInterruptToCheck,
 			LCDStatus.LCDStatusInterrupts.LycLyCoincidenceInt
@@ -230,10 +294,10 @@ public partial class PPU {
 			_oamEntries[i] = null;
 	}
 
-	private uint GetColorFromPalette(byte colorIndex, bool transparent = false) {
+	private uint GetColorFromPalette(ushort paletteAddress, byte colorIndex, bool transparent = false) {
 		if (transparent && colorIndex == 0)
 			return 0x00000000;
-		byte palette = _memory.ReadByte(Memory.BGP.Address);
+		byte palette = _memory.ReadByte(paletteAddress);
 		byte color = (byte)((palette >> (colorIndex * 2)) & 0b11);
 		return Colors[color];
 	}
@@ -253,8 +317,7 @@ public partial class PPU {
 		bool hBlankInterrupt = lcdStatus.HasHBlankInt && interruptsToCheck.Contains(LCDStatus.LCDStatusInterrupts.HBlankInt);
 
 		if (coincidenceInterrupt || oamSearchInterrupt || vBlankInterrupt || hBlankInterrupt) {
-			byte newIf = (byte)(_memory.ReadByte(Memory.InterruptFlagRegister.Address) | (byte)Interrupt.LCDStat);
-			_memory.WriteByte(Memory.InterruptFlagRegister.Address, newIf);
+			_memory.RequestInterrupt(Interrupt.LCDStat);
 		}
 	}
 

@@ -36,8 +36,9 @@ public class OperatorSUB : CPUOperator {
 
 	private void ApplyFlags(CPU cpu, int source, int destination) {
 		var halfCarryMask = (int)_halfCarryBit - 1;
+		var carryMask = (int)_carryBit - 1;
 
-		int result = destination - source;
+		int result = (destination & carryMask) - (source & carryMask);
 		int halfResult = (destination & halfCarryMask) - (source & halfCarryMask);
 
 		Dictionary<CPUFlag, bool> newFlags = new()
