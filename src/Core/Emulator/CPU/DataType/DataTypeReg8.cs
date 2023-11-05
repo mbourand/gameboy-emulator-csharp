@@ -4,11 +4,29 @@ namespace GBMU.Core;
 public class DataTypeReg8 : OperationDataType {
 	private readonly CPURegister _register;
 
-	public DataTypeReg8(CPURegister register) => _register = register;
+	private ushort? _lastRegisteredValue;
 
-	public ushort GetSourceValue(CPU cpu, Memory memory) => cpu.Get8BitRegister(_register);
-	public void WriteToDestination(CPU cpu, Memory memory, ushort value) => cpu.Set8BitRegister(_register, (byte)(value & 0xFF));
+	public DataTypeReg8(CPURegister register) {
+		_register = register;
+		_lastRegisteredValue = null;
+	}
+
+	public ushort GetSourceValue(CPU cpu, Memory memory) {
+		_lastRegisteredValue = cpu.Get8BitRegister(_register);
+		return cpu.Get8BitRegister(_register);
+	}
+
+	public void WriteToDestination(CPU cpu, Memory memory, ushort value) {
+		_lastRegisteredValue = GetSourceValue(cpu, memory);
+		cpu.Set8BitRegister(_register, (byte)(value & 0xFF));
+	}
 
 	public byte GetLength() => 0;
-	public string GetMnemonic() => _register.ToString();
+
+	public string GetMnemonic() {
+		if (_lastRegisteredValue.HasValue) {
+			return $"{_register} {{0x{_lastRegisteredValue.Value:X2}}}";
+		}
+		return $"{_register}";
+	}
 }

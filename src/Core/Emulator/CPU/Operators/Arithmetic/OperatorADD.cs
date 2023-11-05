@@ -44,8 +44,8 @@ public class OperatorADD : CPUOperator {
 		{
 			{ CPUFlag.NSubtract, false },
 			{ CPUFlag.Zero, (byte)result == 0x00 },
-			{ CPUFlag.Carry, result > (int)_carryBit },
-			{ CPUFlag.HalfCarry, halfResult > halfCarryMask },
+			{ CPUFlag.Carry, result >= (int)_carryBit },
+			{ CPUFlag.HalfCarry, halfResult >= (int)_halfCarryBit },
 		};
 
 		_flagHandler.Apply(cpu, newFlags);

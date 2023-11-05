@@ -6,15 +6,11 @@ public class OperatorSBC : CPUOperator {
 	private readonly OperationDataType _sourceDataType;
 	private readonly OperationDataType _destinationDataType;
 	private readonly FlagPermissionHandler _flagHandler;
-	private readonly CarryBit _carryBit;
-	private readonly HalfCarryBit _halfCarryBit;
 
-	public OperatorSBC(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler, CarryBit carryBit, HalfCarryBit halfCarryBit)
+	public OperatorSBC(OperationDataType sourceDataType, OperationDataType destinationDataType, FlagPermissionHandler flagHandler)
 		: base("SBC", 1) {
 		_sourceDataType = sourceDataType;
 		_destinationDataType = destinationDataType;
-		_carryBit = carryBit;
-		_halfCarryBit = halfCarryBit;
 		_flagHandler = flagHandler;
 		length += (byte)(_sourceDataType.GetLength() + _destinationDataType.GetLength());
 	}
@@ -33,7 +29,7 @@ public class OperatorSBC : CPUOperator {
 	}
 
 	private void ApplyFlags(CPU cpu, int sourceValue, int destinationValue) {
-		var halfCarryMask = (int)_halfCarryBit - 1;
+		var halfCarryMask = (int)HalfCarryBit.Bit4 - 1;
 
 		int result = destinationValue - sourceValue - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);
 		int halfResult = (destinationValue & halfCarryMask) - (sourceValue & halfCarryMask) - (cpu.GetFlag(CPUFlag.Carry) ? 1 : 0);

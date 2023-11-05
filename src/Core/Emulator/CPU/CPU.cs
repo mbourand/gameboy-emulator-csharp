@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 
 namespace GBMU.Core;
 
@@ -84,15 +85,17 @@ public partial class CPU {
 
 		// Decode
 		CPUOperator instruction = CBPrefix ? InstructionSet.GetCBInstruction(opcode) : InstructionSet.GetInstruction(opcode);
-		if (!opcodes.Contains(opcode)) {
-			Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
-			opcodes.Add(opcode);
-		}
+		// if (!opcodes.Contains(opcode)) {
+		// 	Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
+		// 	opcodes.Add(opcode);
+		// }
 		CBPrefix = false;
 
 		// Execute
+		var tmpPC = PC;
 		instruction.Execute(this, _memory, opcode);
 		instruction.ShiftPC(this, _memory);
+		// File.AppendAllText("instructions.txt", $"0x{tmpPC:X4}: " + instruction.ToString(this, _memory, opcode, 0x00) + "\n");
 
 		HandleInterrupts();
 	}

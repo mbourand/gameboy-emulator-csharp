@@ -29,4 +29,8 @@ public class OperatorBIT : CPUOperator {
 
 		base.Execute(cpu, memory, opcode);
 	}
+
+	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) {
+		return base.ToString(cpu, memory, opcode, addr) + $" {_sourceDataType.GetMnemonic()}, {_index}";
+	}
 }

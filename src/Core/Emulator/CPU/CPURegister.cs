@@ -33,7 +33,7 @@ public partial class CPU {
 	public void Set16BitRegister(CPURegister register, ushort value) {
 		switch (register) {
 			case CPURegister.AF:
-				AF = value;
+				AF = (ushort)(value & 0xFFF0); // Lower 4 bits of F can't be set
 				break;
 			case CPURegister.BC:
 				BC = value;

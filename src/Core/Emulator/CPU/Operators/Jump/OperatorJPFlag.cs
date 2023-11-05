@@ -28,6 +28,6 @@ public class OperatorJPFlag : CPUOperator {
 	}
 
 	public override string ToString(CPU cpu, Memory memory, int opcode, ushort addr) {
-		return base.ToString(cpu, memory, opcode, addr) + $" ${FlagUtils.FlagConditionToMnemonic(_flag, _expectedValue)}, ${_destinationDataType.GetMnemonic()}";
+		return base.ToString(cpu, memory, opcode, addr) + $" {FlagUtils.FlagConditionToMnemonic(_flag, _expectedValue)}, ${_destinationDataType.GetMnemonic()}";
 	}
 }
