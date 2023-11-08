@@ -29,6 +29,7 @@ public class Gameboy {
 		Timers = new Timers(CPU, Memory);
 
 		Memory.RegisterHook(new DIVHook(Timers));
+		Memory.RegisterHook(new TIMAHook(Timers));
 	}
 
 	public void Update(double deltaTime) {

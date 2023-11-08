@@ -1,5 +1,4 @@
-using System.IO;
-using SharpDX.Direct3D11;
+using System;
 
 namespace GBMU.Core;
 
@@ -15,9 +14,13 @@ public class Timers {
 
 	private int? _timaOverflowDelay;
 
+	private int _timaWasResetThisCycleCounter;
+	public bool TimaWasResetThisCycle => _timaWasResetThisCycleCounter > 0;
+
 	public void ResetInternalTimer() {
 		_internalTimer = 0;
 		_timaOverflowDelay = null;
+		_timaWasResetThisCycleCounter = 0;
 	}
 
 	public Timers(CPU cpu, Memory memory) {
@@ -27,6 +30,7 @@ public class Timers {
 		_timaOverflowElapsedTime = 0;
 		_internalTimer = InternalTimerDefaultValue;
 		_wasTimerBitToCheckOne = false;
+		_timaWasResetThisCycleCounter = 0;
 	}
 
 	public void Update(double elapsedTime) {
@@ -35,12 +39,17 @@ public class Timers {
 		HandleTIMAIncrement();
 	}
 
+	public void CancelTimaOverflow() {
+		_timaOverflowDelay = null;
+	}
+
 	private void HandleTimaOverflow(double elapsedTime) {
 		_timaOverflowElapsedTime += elapsedTime;
 		if (_timaOverflowElapsedTime < CPU.CycleDuration)
 			return;
 
 		_timaOverflowElapsedTime -= CPU.CycleDuration;
+		_timaWasResetThisCycleCounter = Math.Max(0, _timaWasResetThisCycleCounter - 1);
 
 		if (!_timaOverflowDelay.HasValue)
 			return;
@@ -50,6 +59,7 @@ public class Timers {
 			return;
 
 		_timaOverflowDelay = null;
+		_timaWasResetThisCycleCounter = 4;
 		_memory.InternalWriteByte(Memory.TIMA.Address, _memory.InternalReadByte(Memory.TMA.Address));
 		_memory.RequestInterrupt(Interrupt.Timer);
 	}
