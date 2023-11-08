@@ -85,10 +85,9 @@ public partial class CPU {
 	// private HashSet<byte> opcodes = new();
 
 	public void Cycle() {
-		if (_cycleWaitTime > 0) {
-			_cycleWaitTime--;
+		_cycleWaitTime = Math.Max(_cycleWaitTime - 1, 0);
+		if (_cycleWaitTime > 0)
 			return;
-		}
 
 		HandleInterruptMasterEnableDelay();
 

@@ -27,6 +27,8 @@ public class Gameboy {
 		CPU = new CPU(Memory);
 		PPU = new PPU(Memory);
 		Timers = new Timers(CPU, Memory);
+
+		Memory.RegisterHook(new DIVHook(Timers));
 	}
 
 	public void Update(double deltaTime) {

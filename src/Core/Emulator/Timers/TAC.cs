@@ -14,20 +14,10 @@ public enum TACFlags {
 
 public class TAC {
 	private readonly byte _value;
+	public static readonly ushort[] ClockSpeedDividers = new ushort[] { 1024, 16, 64, 256 };
 
 	public bool IsTimerEnabled => (_value & (byte)TACFlags.TimerEnabled) != 0;
-	public float ClockSpeed => GetClockSpeed((TACClockSpeed)(_value & (byte)TACFlags.ClockSpeed));
-	public float CycleDuration => 1 / ClockSpeed;
-
-	private static float GetClockSpeed(TACClockSpeed clockSpeed) {
-		return clockSpeed switch {
-			TACClockSpeed.Hz4096 => CPU.ClockSpeed / 1024f,
-			TACClockSpeed.Hz262144 => CPU.ClockSpeed / 16f,
-			TACClockSpeed.Hz65536 => CPU.ClockSpeed / 64f,
-			TACClockSpeed.Hz16384 => CPU.ClockSpeed / 256f,
-			_ => throw new System.NotImplementedException()
-		};
-	}
+	public ushort ClockSpeedWatchBit => (ushort)(ClockSpeedDividers[_value & (byte)TACFlags.ClockSpeed] >> 1);
 
 	public TAC(byte value) {
 		_value = value;
