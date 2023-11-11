@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using GBMU.Core;
 using Microsoft.Xna.Framework;
@@ -57,9 +58,23 @@ public class GBMUWindow : Game {
 	}
 
 	protected override void Update(GameTime gameTime) {
-		if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape)) {
+		var keyboardState = Keyboard.GetState();
+
+		if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape)) {
 			Exit();
 		}
+
+		Dictionary<Keys, JoypadButton> keyMapping = new() {
+			{ Keys.A, JoypadButton.A },
+			{ Keys.S, JoypadButton.B },
+			{ Keys.Enter, JoypadButton.Start },
+			{ Keys.Space, JoypadButton.Select }
+		};
+
+		foreach (var (key, button) in keyMapping) {
+			_gameboy.Joypad.RequireButtonPress(button, keyboardState.IsKeyDown(key));
+		}
+
 		base.Update(gameTime);
 	}
 

@@ -21,15 +21,22 @@ public class Gameboy {
 		get; private set;
 	}
 
+	public Joypad Joypad {
+		get; private set;
+	}
+
 	public Gameboy(Stream romStream) {
 		Cartridge = new Cartridge(romStream);
 		Memory = new Memory(Cartridge);
 		CPU = new CPU(Memory);
 		PPU = new PPU(Memory);
 		Timers = new Timers(CPU, Memory);
+		Joypad = new Joypad(Memory);
 
 		Memory.RegisterHook(new DIVHook(Timers));
 		Memory.RegisterHook(new TIMAHook(Timers));
+		Memory.RegisterHook(new TMAHook(Timers));
+		Memory.RegisterHook(new JOYPHook());
 	}
 
 	public void Update(double deltaTime) {
