@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using Microsoft.Xna.Framework.Audio;
 
 namespace GBMU.Core;
 
@@ -17,7 +19,6 @@ public class OperatorAND : CPUOperator {
 	public override void Execute(CPU cpu, Memory memory, int opcode) {
 		var sourceValue = _sourceDataType.GetSourceValue(cpu, memory);
 		var destinationValue = _destinationDataType.GetSourceValue(cpu, memory);
-
 
 		ushort result = (ushort)(sourceValue & destinationValue);
 		Dictionary<CPUFlag, bool> newFlags = new()

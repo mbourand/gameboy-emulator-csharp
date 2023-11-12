@@ -100,7 +100,7 @@ public class Timers {
 		_memory.InternalWriteByte(Memory.TIMA.Address, (byte)(tima + 1));
 	}
 
-	public const float InternalTimerClockSpeed = CPU.ClockSpeed;
-	public const float InternalTimerCycleDuration = 1.0f / InternalTimerClockSpeed;
+	public const double InternalTimerClockSpeed = CPU.ClockSpeed;
+	public const double InternalTimerCycleDuration = 1.0f / InternalTimerClockSpeed;
 	public const ushort InternalTimerDefaultValue = 0xABCC;
 }

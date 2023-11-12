@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace GBMU.Core;
 
@@ -96,8 +94,8 @@ public partial class CPU {
 			byte opcode = _memory.ReadByte(PC);
 
 			// Decode
+			var tmpCBPrefix = CBPrefix;
 			CPUOperator instruction = CBPrefix ? InstructionSet.GetCBInstruction(opcode) : InstructionSet.GetInstruction(opcode);
-			_cycleWaitTime = instruction.GetCycles(CBPrefix, opcode);
 			// if (!opcodes.Contains(opcode)) {
 			// 	Console.WriteLine($"0x{opcode:X2} {instruction.ToString(this, _memory, opcode, 0x00)}");
 			// 	opcodes.Add(opcode);
@@ -108,6 +106,7 @@ public partial class CPU {
 			// var tmpPC = PC;
 			instruction.Execute(this, _memory, opcode);
 			instruction.ShiftPC(this, _memory);
+			_cycleWaitTime = instruction.GetCycles(tmpCBPrefix, opcode);
 			// File.AppendAllText("instructions.txt", $"0x{tmpPC:X4}: " + instruction.ToString(this, _memory, opcode, 0x00) + "\n");
 		}
 
@@ -115,6 +114,9 @@ public partial class CPU {
 	}
 
 	public void HandleInterrupts() {
+		if (CBPrefix)
+			return;
+
 		byte enabledInterrupts = _memory.ReadByte(Memory.InterruptEnableRegister.Address);
 		byte triggeredInterrupts = _memory.ReadByte(Memory.InterruptFlagRegister.Address);
 

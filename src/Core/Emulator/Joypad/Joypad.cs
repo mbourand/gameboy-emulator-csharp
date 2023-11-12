@@ -33,6 +33,8 @@ public class Joypad {
 		if (pressed) {
 			p1 &= (byte)~button;
 			_memory.RequestInterrupt(Interrupt.Joypad);
+		} else {
+			p1 |= (byte)button;
 		}
 
 		_memory.InternalWriteByte(Memory.P1.Address, p1);
