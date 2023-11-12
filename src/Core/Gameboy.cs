@@ -37,6 +37,10 @@ public class Gameboy {
 		Memory.RegisterHook(new TIMAHook(Timers));
 		Memory.RegisterHook(new TMAHook(Timers));
 		Memory.RegisterHook(new JOYPHook());
+
+		IMemoryHook mbc = Cartridge.GetMemoryBankController();
+		if (mbc != null)
+			Memory.RegisterHook(mbc);
 	}
 
 	public void Update(double deltaTime) {

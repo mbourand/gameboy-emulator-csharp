@@ -3,20 +3,37 @@ using System.IO;
 namespace GBMU.Core;
 
 public class Cartridge {
-	private readonly byte[] _rom;
+	public readonly byte[] Rom;
 
 	public Cartridge(Stream stream) {
-		_rom = new byte[stream.Length];
-		stream.Read(_rom, 0, _rom.Length);
+		Rom = new byte[stream.Length];
+		stream.Read(Rom, 0, Rom.Length);
 	}
 
-	public int RomSize => _rom.Length;
+	public int RomSize => Rom.Length;
+	public int RomBankCount => 1 << (MemoryUtils.ReadByte(Rom, ROMSize.Address) + 1);
 
-	public byte ReadByte(ushort addr) => MemoryUtils.ReadByte(_rom, addr);
-	public ushort ReadWord(ushort addr) => MemoryUtils.ReadWord(_rom, addr);
+	public IMemoryHook GetMemoryBankController() {
+		byte cartridgeType = MemoryUtils.ReadByte(Rom, CartridgeType.Address);
+		switch (cartridgeType) {
+			case 0x00:
+			case 0x08:
+			case 0x09:
+				return null; //new NoMBC(this);
+			case 0x01:
+			case 0x02:
+			case 0x03:
+				return new MBC1(this);
+			default:
+				return null;
+		}
+	}
 
-	public void WriteByte(ushort addr, byte value) => MemoryUtils.WriteByte(_rom, addr, value);
-	public void WriteWord(ushort addr, ushort value) => MemoryUtils.WriteWord(_rom, addr, value);
+	public byte ReadByte(ushort addr) => MemoryUtils.ReadByte(Rom, addr);
+	public ushort ReadWord(ushort addr) => MemoryUtils.ReadWord(Rom, addr);
+
+	public void WriteByte(ushort addr, byte value) => MemoryUtils.WriteByte(Rom, addr, value);
+	public void WriteWord(ushort addr, ushort value) => MemoryUtils.WriteWord(Rom, addr, value);
 
 	public static readonly MemoryKeyPoint EntryPoint = new(0x100, 4);
 	public static readonly MemoryKeyPoint NintendoLogo = new(0x104, 48);

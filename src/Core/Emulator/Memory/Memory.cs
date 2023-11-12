@@ -11,8 +11,8 @@ public class Memory {
 		for (int i = 0; i < _memory.Length; i++) {
 			_memory[i] = 0xFF;
 		}
-		for (int i = 0; i < cartridge.RomSize; i++) {
-			_memory[ROMBank0.Address + i] = cartridge.ReadByte((ushort)i);
+		for (ushort i = CartridgeSpan.Address; i < CartridgeSpan.EndAddress; i++) {
+			_memory[i] = cartridge.ReadByte((ushort)(i - CartridgeSpan.Address));
 		}
 		_memory[P1.Address] = 0xCF;
 		_memory[SB.Address] = 0x00;
@@ -218,4 +218,9 @@ public class Memory {
 	public static readonly MemoryKeyPoint OCPS = new(0xFF6A, 1);
 	public static readonly MemoryKeyPoint OCPD = new(0xFF6B, 1);
 	public static readonly MemoryKeyPoint SVBK = new(0xFF70, 1);
+	public static readonly MemoryKeyPoint RAMEnable = new(0x0000, 0x2000);
+	public static readonly MemoryKeyPoint ROMBankNumber = new(0x2000, 0x2000);
+	public static readonly MemoryKeyPoint RAMBankNumber = new(0x4000, 0x2000);
+	public static readonly MemoryKeyPoint BankingModeSelect = new(0x6000, 0x2000);
+	public static readonly MemoryKeyPoint CartridgeSpan = new(0x0000, 0x8000);
 }
