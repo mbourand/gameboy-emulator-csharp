@@ -25,6 +25,10 @@ public class Gameboy {
 		get; private set;
 	}
 
+	public DMAHook DMAHook {
+		get; private set;
+	}
+
 	public Gameboy(Stream romStream) {
 		Cartridge = new Cartridge(romStream);
 		Memory = new Memory(Cartridge);
@@ -32,11 +36,15 @@ public class Gameboy {
 		PPU = new PPU(Memory);
 		Timers = new Timers(CPU, Memory);
 		Joypad = new Joypad(Memory);
+		DMAHook = new DMAHook(Memory);
+
+		Memory.RegisterHook(DMAHook);
 
 		Memory.RegisterHook(new DIVHook(Timers));
 		Memory.RegisterHook(new TIMAHook(Timers));
 		Memory.RegisterHook(new TMAHook(Timers));
 		Memory.RegisterHook(new JOYPHook());
+		Memory.RegisterHook(new ECHOHook());
 
 		IMemoryHook mbc = Cartridge.GetMemoryBankController();
 		if (mbc != null)
@@ -44,6 +52,7 @@ public class Gameboy {
 	}
 
 	public void Update(double deltaTime) {
+		DMAHook.Update(deltaTime);
 		Timers.Update(deltaTime);
 		CPU.Update(deltaTime);
 		PPU.Update(deltaTime);

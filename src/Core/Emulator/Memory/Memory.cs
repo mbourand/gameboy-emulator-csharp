@@ -14,6 +14,7 @@ public class Memory {
 		for (ushort i = CartridgeSpan.Address; i < CartridgeSpan.EndAddress; i++) {
 			_memory[i] = cartridge.ReadByte((ushort)(i - CartridgeSpan.Address));
 		}
+
 		_memory[P1.Address] = 0xCF;
 		_memory[SB.Address] = 0x00;
 		_memory[SC.Address] = 0x7E;
@@ -104,7 +105,6 @@ public class Memory {
 				return;
 		MemoryUtils.WriteByte(_memory, addr, value);
 	}
-
 
 	public ushort ReadWord(ushort addr) {
 		foreach (var hook in _hooks) {
