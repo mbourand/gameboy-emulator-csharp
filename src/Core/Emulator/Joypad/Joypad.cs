@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace GBMU.Core;
 
 public enum JoypadButton {
@@ -20,13 +18,13 @@ public class Joypad {
 		_memory = memory;
 	}
 
-	public void RequireButtonPress(JoypadButton button, bool pressed) {
+	public void RequireButtonPress(JoypadButton button, bool isKeypad, bool pressed) {
 		byte p1 = _memory.InternalReadByte(Memory.P1.Address);
 		JoypadState joypadState = new(p1);
 
-		if (!joypadState.IsListeningToActionButtons && ActionButtons.Contains(button))
+		if (!joypadState.IsListeningToActionButtons && !isKeypad)
 			return;
-		if (!joypadState.IsListeningToDirectionButtons && KeyPadButtons.Contains(button))
+		if (!joypadState.IsListeningToDirectionButtons && isKeypad)
 			return;
 
 		// 0 = pressed, 1 = not pressed
@@ -39,18 +37,4 @@ public class Joypad {
 
 		_memory.InternalWriteByte(Memory.P1.Address, p1);
 	}
-
-	public static readonly List<JoypadButton> KeyPadButtons = new() {
-		JoypadButton.Right,
-		JoypadButton.Left,
-		JoypadButton.Up,
-		JoypadButton.Down,
-	};
-
-	public static readonly List<JoypadButton> ActionButtons = new() {
-		JoypadButton.A,
-		JoypadButton.B,
-		JoypadButton.Select,
-		JoypadButton.Start,
-	};
 }

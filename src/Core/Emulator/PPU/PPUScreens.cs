@@ -33,11 +33,7 @@ public class PPUScreens {
 	public void SetPixel(uint x, uint y, uint color) {
 		if (x >= _screen1[0].Length || y >= _screen1.Length || x < 0 || y < 0)
 			return;
-		if (_screenIndex == 0) {
-			_screen2[y][x] = color;
-		} else {
-			_screen1[y][x] = color;
-		}
+		var currentScreen = GetDisplayScreen();
+		currentScreen[y][x] = color;
 	}
-
 }

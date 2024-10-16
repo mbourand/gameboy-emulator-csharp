@@ -10,7 +10,7 @@ public class JOYPHook : IMemoryHook {
 			return false;
 
 		byte currentP1 = MemoryUtils.ReadByte(memory, Memory.P1.Address);
-		byte newP1 = (byte)(value & 0xF0 | currentP1 & 0x0F); // Only the 4 upper bits of P1 are writable
+		byte newP1 = (byte)((value & 0xF0) | (currentP1 & 0x0F)); // Only the 4 upper bits of P1 are writable
 		MemoryUtils.WriteByte(memory, Memory.P1.Address, newP1);
 
 		return true;

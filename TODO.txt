@@ -1,0 +1,4 @@
+Régler le PPU - Transfert OAM DMA ?
+Joypad qui marche pas
+Voir pour implémenter les timings en temps réel sur le cpu
+Timing des interrupts

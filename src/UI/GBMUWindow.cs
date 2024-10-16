@@ -42,9 +42,33 @@ public class GBMUWindow : Game {
 		_gameboy = new Gameboy(romStream);
 
 		_gameboyThread = new Thread(() => {
+			Dictionary<Keys, JoypadButton> actionMapping = new() {
+				{ Keys.A, JoypadButton.A },
+				{ Keys.S, JoypadButton.B },
+				{ Keys.Enter, JoypadButton.Start },
+				{ Keys.Space, JoypadButton.Select },
+			};
+
+			Dictionary<Keys, JoypadButton> keypadMapping = new() {
+				{ Keys.Right, JoypadButton.Right },
+				{ Keys.Left, JoypadButton.Left },
+				{ Keys.Up, JoypadButton.Up },
+				{ Keys.Down, JoypadButton.Down }
+			};
+
 			var lastFrame = DateTime.Now;
 			while (!_exit) {
+				var keyboardState = Keyboard.GetState();
 				var now = DateTime.Now;
+
+				foreach (var (key, button) in actionMapping) {
+					_gameboy.Joypad.RequireButtonPress(button, false, keyboardState.IsKeyDown(key));
+				}
+
+				foreach (var (key, button) in keypadMapping) {
+					_gameboy.Joypad.RequireButtonPress(button, true, keyboardState.IsKeyDown(key));
+				}
+
 				_gameboy.Update((now - lastFrame).TotalSeconds);
 				lastFrame = now;
 			}
@@ -62,17 +86,6 @@ public class GBMUWindow : Game {
 
 		if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || keyboardState.IsKeyDown(Keys.Escape)) {
 			Exit();
-		}
-
-		Dictionary<Keys, JoypadButton> keyMapping = new() {
-			{ Keys.A, JoypadButton.A },
-			{ Keys.S, JoypadButton.B },
-			{ Keys.Enter, JoypadButton.Start },
-			{ Keys.Space, JoypadButton.Select }
-		};
-
-		foreach (var (key, button) in keyMapping) {
-			_gameboy.Joypad.RequireButtonPress(button, keyboardState.IsKeyDown(key));
 		}
 
 		base.Update(gameTime);
