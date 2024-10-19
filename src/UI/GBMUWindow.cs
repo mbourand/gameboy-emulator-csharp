@@ -16,15 +16,18 @@ public class GBMUWindow : Game {
 
     private Thread _gameboyThread;
 
+    private Texture2D _texture;
+
+
     bool _exit = false;
 
     public GBMUWindow() {
         Window.Title = "GBMU";
         Window.AllowUserResizing = false;
 
-        _graphics = new GraphicsDeviceManager(this) {
-            PreferredBackBufferWidth = 160,
-            PreferredBackBufferHeight = 144
+        _graphics = new(this) {
+            PreferredBackBufferWidth = WindowWidth,
+            PreferredBackBufferHeight = WindowHeight
         };
         _graphics.SynchronizeWithVerticalRetrace = false;
         _graphics.ApplyChanges();
@@ -53,6 +56,8 @@ public class GBMUWindow : Game {
                 lastFrame = now;
             }
         });
+
+        _texture = new(GraphicsDevice, (int)PPU.ScreenWidth, (int)PPU.ScreenHeight);
 
         _gameboyThread.Start();
     }
@@ -94,17 +99,16 @@ public class GBMUWindow : Game {
     protected override void Draw(GameTime gameTime) {
         GraphicsDevice.Clear(Color.Black);
 
-        Color[] colors = new Color[WindowWidth * WindowHeight];
+        Color[] colors = new Color[PPU.ScreenWidth * PPU.ScreenHeight];
         var ppuPixels = _gameboy.PPU.GetDisplayScreen();
         for (int y = 0; y < PPU.ScreenHeight; y++)
             for (int x = 0; x < PPU.ScreenWidth; x++)
-                colors[y * PPU.ScreenWidth + x] = new Color(ppuPixels[y][x]);
+                colors[y * PPU.ScreenWidth + x] = new Color(ppuPixels[y * PPU.ScreenWidth + x]);
 
-        Texture2D texture = new(GraphicsDevice, WindowWidth, WindowHeight);
-        texture.SetData(colors);
+        _texture.SetData(colors);
 
         _spriteBatch.Begin();
-        _spriteBatch.Draw(texture, new Rectangle(0, 0, texture.Width, texture.Height), Color.White);
+        _spriteBatch.Draw(_texture, Vector2.Zero, new Rectangle(0, 0, _texture.Width, _texture.Height), Color.White, 0, Vector2.Zero, PPUScreenToWindowRatio, SpriteEffects.None, 0);
         _spriteBatch.End();
 
         base.Draw(gameTime);
@@ -124,7 +128,7 @@ public class GBMUWindow : Game {
         { Keys.Down, JoypadButton.StartOrDown }
     };
 
-    public const uint PPUScreenToWindowRatio = 1; // TODO: Finish implementing this
+    public const int PPUScreenToWindowRatio = 3;
     public const int WindowWidth = (int)(PPU.ScreenWidth * PPUScreenToWindowRatio);
     public const int WindowHeight = (int)(PPU.ScreenHeight * PPUScreenToWindowRatio);
 }

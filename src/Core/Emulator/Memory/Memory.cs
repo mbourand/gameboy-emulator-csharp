@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace GBMU.Core;
 
@@ -72,22 +73,30 @@ public class Memory {
         _memory[InterruptEnableRegister.Address] = 0x00;
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void RegisterHook(IMemoryHook hook) {
         _hooks.Add(hook);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void UnregisterHook(IMemoryHook hook) {
         _hooks.Remove(hook);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void InternalWriteByte(ushort addr, byte value) {
         MemoryUtils.WriteByte(_memory, addr, value);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public void InternalWriteWord(ushort addr, ushort value) {
         MemoryUtils.WriteWord(_memory, addr, value);
     }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public byte InternalReadByte(ushort addr) => MemoryUtils.ReadByte(_memory, addr);
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public ushort InternalReadWord(ushort addr) => MemoryUtils.ReadWord(_memory, addr);
 
     public byte ReadByte(ushort addr) {
