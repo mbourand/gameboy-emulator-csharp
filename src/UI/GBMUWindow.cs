@@ -98,14 +98,14 @@ public class GBMUWindow : Game {
 
         _texture.SetData(colors);
 
-        _spriteBatch.Begin();
+        _spriteBatch.Begin(samplerState: SamplerState.PointClamp);
         _spriteBatch.Draw(_texture, Vector2.Zero, new Rectangle(0, 0, _texture.Width, _texture.Height), Color.White, 0, Vector2.Zero, PPUScreenToWindowRatio, SpriteEffects.None, 0);
         _spriteBatch.End();
 
         base.Draw(gameTime);
     }
 
-    public const int PPUScreenToWindowRatio = 3;
+    public const int PPUScreenToWindowRatio = 6;
     public const int WindowWidth = (int)(PPU.ScreenWidth * PPUScreenToWindowRatio);
     public const int WindowHeight = (int)(PPU.ScreenHeight * PPUScreenToWindowRatio);
 }
