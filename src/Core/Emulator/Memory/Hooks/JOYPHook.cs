@@ -1,26 +1,34 @@
 namespace GBMU.Core;
 
 public class JOYPHook : IMemoryHook {
-	public byte? OnReadByte(byte[] memory, ushort address) {
-		return null;
-	}
+    private readonly InputPoller _poller;
 
-	public bool OnWriteByte(byte[] memory, ushort address, byte value) {
-		if (address != Memory.P1.Address)
-			return false;
+    public JOYPHook(InputPoller poller) {
+        _poller = poller;
+    }
 
-		byte currentP1 = MemoryUtils.ReadByte(memory, Memory.P1.Address);
-		byte newP1 = (byte)((value & 0xF0) | (currentP1 & 0x0F)); // Only the 4 upper bits of P1 are writable
-		MemoryUtils.WriteByte(memory, Memory.P1.Address, newP1);
+    public byte? OnReadByte(byte[] memory, ushort address) {
+        return null;
+    }
 
-		return true;
-	}
+    public bool OnWriteByte(byte[] memory, ushort address, byte value) {
+        if (address != Memory.P1.Address)
+            return false;
 
-	public ushort? OnReadWord(byte[] memory, ushort address) {
-		return null;
-	}
+        byte currentP1 = MemoryUtils.ReadByte(memory, Memory.P1.Address);
+        byte newP1 = (byte)((value & 0xF0) | (currentP1 & 0x0F)); // Only the 4 upper bits of P1 are writable
+        MemoryUtils.WriteByte(memory, Memory.P1.Address, newP1);
 
-	public bool OnWriteWord(byte[] memory, ushort address, ushort value) {
-		return false;
-	}
+        _poller.Poll();
+
+        return true;
+    }
+
+    public ushort? OnReadWord(byte[] memory, ushort address) {
+        return null;
+    }
+
+    public bool OnWriteWord(byte[] memory, ushort address, ushort value) {
+        return false;
+    }
 }

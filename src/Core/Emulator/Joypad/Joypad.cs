@@ -19,10 +19,12 @@ public class Joypad {
 
         // 0 = pressed, 1 = not pressed
         if (pressed) {
-            p1 &= (byte)~button;
             var wasPressed = (p1 & (byte)button) == 0;
-            if (!wasPressed)
+
+            p1 &= (byte)~button;
+            if (!wasPressed) {
                 _memory.RequestInterrupt(Interrupt.Joypad);
+            }
         } else {
             p1 |= (byte)button;
         }

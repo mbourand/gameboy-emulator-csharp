@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using GBMU.Core;
 using Microsoft.Xna.Framework;
@@ -73,16 +74,6 @@ public class GBMUWindow : Game {
             Exit();
         }
 
-        JoypadState joypadState = new(_gameboy.Memory.InternalReadByte(Memory.P1.Address));
-
-        if (joypadState.IsListeningToActionButtons)
-            foreach (var (key, button) in ActionMapping)
-                _gameboy.Joypad.RequireButtonPress(button, keyboardState.IsKeyDown(key));
-
-        if (joypadState.IsListeningToDirectionButtons)
-            foreach (var (key, button) in KeypadMapping)
-                _gameboy.Joypad.RequireButtonPress(button, keyboardState.IsKeyDown(key));
-
         base.Update(gameTime);
     }
 
@@ -113,20 +104,6 @@ public class GBMUWindow : Game {
 
         base.Draw(gameTime);
     }
-
-    public readonly Dictionary<Keys, JoypadButton> ActionMapping = new() {
-        { Keys.A, JoypadButton.AOrRight },
-        { Keys.S, JoypadButton.BOrLeft },
-        { Keys.Enter, JoypadButton.StartOrDown },
-        { Keys.Space, JoypadButton.SelectOrUp },
-    };
-
-    public readonly Dictionary<Keys, JoypadButton> KeypadMapping = new() {
-        { Keys.Right, JoypadButton.AOrRight },
-        { Keys.Left, JoypadButton.BOrLeft },
-        { Keys.Up, JoypadButton.SelectOrUp },
-        { Keys.Down, JoypadButton.StartOrDown }
-    };
 
     public const int PPUScreenToWindowRatio = 3;
     public const int WindowWidth = (int)(PPU.ScreenWidth * PPUScreenToWindowRatio);

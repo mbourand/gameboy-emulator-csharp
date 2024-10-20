@@ -107,7 +107,6 @@ public partial class PPU {
         if (!TickDelay(20))
             return;
 
-        ClearOAMEntries();
         ReadOAMEntries();
         SelectOAMEntries();
 
